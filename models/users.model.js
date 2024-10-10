@@ -15,7 +15,7 @@ async function createNewUser(email, password, language) {
         const user = await userModel.findOne({ email });
         if (user) {
             return {
-                msg: getSuitableTranslations("Sorry, Can't Create User Because it is Exist !!", language),
+                msg: getSuitableTranslations("Sorry, Can't Create New User Because It Is Already Exist !!", language),
                 error: true,
                 data: {},
             }
@@ -26,7 +26,7 @@ async function createNewUser(email, password, language) {
             language
         })).save();
         return {
-            msg: getSuitableTranslations("Ok !!, Create New User Process Has Been Successfuly !!", language),
+            msg: getSuitableTranslations("Creating New User Process Has Been Successfuly !!", language),
             error: false,
             data: {},
         }
@@ -72,7 +72,7 @@ async function loginByGoogle(userInfo, language) {
         const user = await userModel.findOne({ email: userInfo.email });
         if (user) {
             return {
-                msg: getSuitableTranslations("Logining Process Has Been Successfully !!", language),
+                msg: getSuitableTranslations("Logining Process By Google Has Been Successfully !!", language),
                 error: false,
                 data: {
                     _id: user._id,
@@ -90,7 +90,7 @@ async function loginByGoogle(userInfo, language) {
             provider: "google",
         })).save();
         return {
-            msg: getSuitableTranslations("Logining Process Has Been Successfully !!", language),
+            msg: getSuitableTranslations("Logining Process By Google Has Been Successfully !!", language),
             error: false,
             data: {
                 _id,
@@ -135,7 +135,7 @@ async function isExistUserAndVerificationEmail(email, language) {
                 };
             }
             return {
-                msg: getSuitableTranslations("Sorry, The Email For This User Has Been Verified !!", language),
+                msg: getSuitableTranslations("Sorry, This Email Has Been Verified !!", language),
                 error: true,
                 data: {},
             };
@@ -154,7 +154,7 @@ async function getUsersCount(authorizationId, filters, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin) {
-            if (admin.isWebsiteOwner) {
+            if (admin.isSuperAdmin) {
                 return {
                     msg: getSuitableTranslations("Get Users Count Process Has Been Successfully !!", language),
                     error: false,
@@ -162,7 +162,7 @@ async function getUsersCount(authorizationId, filters, language) {
                 }
             }
             return {
-                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
+                msg: getSuitableTranslations("Sorry, Permission Denied Because This Admin Is Not Super Admin !!", language),
                 error: true,
                 data: {},
             }
@@ -181,7 +181,7 @@ async function getAllUsersInsideThePage(authorizationId, pageNumber, pageSize, f
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin) {
-            if (admin.isWebsiteOwner) {
+            if (admin.isSuperAdmin) {
                 return {
                     msg: getSuitableTranslations("Get All Users Inside The Page: {{pageNumber}} Process Has Been Successfully !!", language, { pageNumber }),
                     error: false,
@@ -189,7 +189,7 @@ async function getAllUsersInsideThePage(authorizationId, pageNumber, pageSize, f
                 }
             }
             return {
-                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
+                msg: getSuitableTranslations("Sorry, Permission Denied Because This Admin Is Not Super Admin !!", language),
                 error: true,
                 data: {},
             }
@@ -357,7 +357,7 @@ async function deleteUser(authorizationId, userId, language){
     try{
         const admin = await adminModel.findById(authorizationId);
         if (admin) {
-            if (admin.isWebsiteOwner) {
+            if (admin.isSuperAdmin) {
                 const user = await userModel.findOneAndDelete({ _id: userId });
                 if (user) {
                     await productsWalletModel.deleteMany({ userId });
@@ -375,7 +375,7 @@ async function deleteUser(authorizationId, userId, language){
                 }
             }
             return {
-                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
+                msg: getSuitableTranslations("Sorry, Permission Denied Because This Admin Is Not Super Admin !!", language),
                 error: true,
                 data: {},
             }
