@@ -2,7 +2,9 @@
 
 const { favoriteProductModel, productModel, userModel } = require("../models/all.models");
 
-async function addNewFavoriteProduct(userId, productId) {
+const { getSuitableTranslations } = require("../global/functions");
+
+async function addNewFavoriteProduct(userId, productId, language) {
     try{
         const user = await userModel.findById(userId);
         if (user) {
@@ -18,25 +20,25 @@ async function addNewFavoriteProduct(userId, productId) {
                         userId
                     });
                     return {
-                        msg: "Adding New Favorite Product Process Has Been Successfully !!",
+                        msg: getSuitableTranslations("Adding New Favorite Product Process Has Been Successfully !!", language),
                         error: false,
                         data: await newFavoriteProduct.save(),
                     }
                 }
                 return {
-                    msg: "Sorry, This Favorite Product For This User Is Already Exist !!",
+                    msg: getSuitableTranslations("Sorry, This Favorite Product For This User Is Already Exist !!", language),
                     error: true,
                     data: {},
                 }
             }
             return {
-                msg: "Sorry, This Product Is Not Exist !!",
+                msg: getSuitableTranslations("Sorry, This Product Is Not Exist !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This User Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This User Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -46,10 +48,10 @@ async function addNewFavoriteProduct(userId, productId) {
     }
 }
 
-async function getFavoriteProductsCount(filters) {
+async function getFavoriteProductsCount(filters, language) {
     try {
         return {
-            msg: "Get All Favorite Products Count Process Has Been Successfully !!",
+            msg: getSuitableTranslations("Get All Favorite Products Count Process Has Been Successfully !!", language),
             error: false,
             data: await favoriteProductModel.countDocuments(filters),
         }
@@ -59,10 +61,10 @@ async function getFavoriteProductsCount(filters) {
     }
 }
 
-async function getAllFavoriteProductsInsideThePage(pageNumber, pageSize, filters) {
+async function getAllFavoriteProductsInsideThePage(pageNumber, pageSize, filters, language) {
     try {
         return {
-            msg: `Get All Favorite Products Inside The Page: ${pageNumber} Process Has Been Successfully !!`,
+            msg: getSuitableTranslations("Get All Favorite Products Inside The Page: {{pageNumber}} Process Has Been Successfully !!", language, { pageNumber }),
             error: false,
             data: await favoriteProductModel.find(filters).skip((pageNumber - 1) * pageSize).limit(pageSize),
         }
@@ -72,10 +74,10 @@ async function getAllFavoriteProductsInsideThePage(pageNumber, pageSize, filters
     }
 }
 
-async function getFavoriteProductsByProductsIdsAndUserId(userId, productsIds) {
+async function getFavoriteProductsByProductsIdsAndUserId(userId, productsIds, language) {
     try{
         return {
-            msg: "Get Favorite Products By Products Ids And User Id Process Has Been Successfully !!",
+            msg: getSuitableTranslations("Get Favorite Products By Products Ids And User Id Process Has Been Successfully !!", language),
             error: false,
             data: await favoriteProductModel.find({ productId: { $in: productsIds }, userId }),
         }
@@ -85,26 +87,26 @@ async function getFavoriteProductsByProductsIdsAndUserId(userId, productsIds) {
     }
 }
 
-async function deleteFavoriteProduct(userId, productId) {
+async function deleteFavoriteProduct(userId, productId, language) {
     try{
         const user = await userModel.findById(userId);
         if (user) {
             const favoriteProduct = await favoriteProductModel.findOneAndDelete({ productId, userId });
             if (favoriteProduct) {
                 return {
-                    msg: "Deleting Favorite Product Process Has Been Successfully !!",
+                    msg: getSuitableTranslations("Deleting Favorite Product Process Has Been Successfully !!", language),
                     error: false,
                     data: {},
                 }
             }
             return {
-                msg: "Sorry, This Favorite Product Is Not Exist !!",
+                msg: getSuitableTranslations("Sorry, This Favorite Product Is Not Exist !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This User Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This User Is Not Exist !!", language),
             error: true,
             data: {},
         }

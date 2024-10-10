@@ -2,14 +2,16 @@
 
 const { categoryModel, adminModel, productModel } = require("../models/all.models");
 
-async function addNewCategory(authorizationId, categoryName) {
+const { getSuitableTranslations } = require("../global/functions");
+
+async function addNewCategory(authorizationId, categoryName, language) {
     try{
         const admin = await adminModel.findById(authorizationId);
         if (admin){
             const category = await categoryModel.findOne({ name: categoryName });
             if (category) {
                 return {
-                    msg: "Sorry, This Cateogry Is Already Exist !!",
+                    msg: getSuitableTranslations("Sorry, This Cateogry Is Already Exist !!", language),
                     error: true,
                     data: {},
                 }
@@ -18,13 +20,13 @@ async function addNewCategory(authorizationId, categoryName) {
                 name: categoryName,
             })).save();
             return {
-                msg: "Adding New Category Process Has Been Successfuly ...",
+                msg: getSuitableTranslations("Adding New Category Process Has Been Successfuly !!", language),
                 error: false,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -34,10 +36,10 @@ async function addNewCategory(authorizationId, categoryName) {
     }
 }
 
-async function getAllCategories(filters) {
+async function getAllCategories(filters, language) {
     try {
         return {
-            msg: "Get All Categories Process Has Been Successfully !!",
+            msg: getSuitableTranslations("Get All Categories Process Has Been Successfully !!", language),
             error: false,
             data: await categoryModel.find(filters),
         }
@@ -47,18 +49,18 @@ async function getAllCategories(filters) {
     }
 }
 
-async function getCategoryInfo(categoryId) {
+async function getCategoryInfo(categoryId, language) {
     try {
         const categoryInfo = await categoryModel.findById(categoryId);
         if (categoryInfo) {
             return {
-                msg: "Get Category Info Process Has Been Successfuly !!",
+                msg: getSuitableTranslations("Get Category Info Process Has Been Successfuly !!", language),
                 error: false,
                 data: categoryInfo,
             }
         }
         return {
-            msg: "Sorry, This Category It Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Category It Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -68,10 +70,10 @@ async function getCategoryInfo(categoryId) {
     }
 }
 
-async function getCategoriesCount(filters) {
+async function getCategoriesCount(filters, language) {
     try {
         return {
-            msg: "Get All Categories Process Has Been Successfully !!",
+            msg: getSuitableTranslations("Get All Categories Process Has Been Successfully !!", language),
             error: false,
             data: await categoryModel.countDocuments(filters),
         }
@@ -81,10 +83,10 @@ async function getCategoriesCount(filters) {
     }
 }
 
-async function getAllCategoriesInsideThePage(pageNumber, pageSize, filters) {
+async function getAllCategoriesInsideThePage(pageNumber, pageSize, filters, language) {
     try {
         return {
-            msg: `Get All Categories Inside The Page: ${pageNumber} Process Has Been Successfully !!`,
+            msg: getSuitableTranslations("Get All Categories Inside The Page: {{pageNumber}} Process Has Been Successfully !!", language, { pageNumber }),
             error: false,
             data: await categoryModel.find(filters).skip((pageNumber - 1) * pageSize).limit(pageSize),
         }
@@ -94,7 +96,7 @@ async function getAllCategoriesInsideThePage(pageNumber, pageSize, filters) {
     }
 }
 
-async function deleteCategory(authorizationId, categoryId) {
+async function deleteCategory(authorizationId, categoryId, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin){
@@ -104,19 +106,19 @@ async function deleteCategory(authorizationId, categoryId) {
             if (category) {
                 await productModel.updateMany({ categoryId }, { category: "uncategorized" });
                 return {
-                    msg: "Deleting Category Process Has Been Successfuly ...",
+                    msg: getSuitableTranslations("Deleting Category Process Has Been Successfuly !!", language),
                     error: false,
                     data: {},
                 };
             }
             return {
-                msg: "Sorry, This Category Is Not Exist !!",
+                msg: getSuitableTranslations("Sorry, This Category Is Not Exist !!", language),
                 error: true,
                 data: {},
             };
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -126,26 +128,26 @@ async function deleteCategory(authorizationId, categoryId) {
     }
 }
 
-async function updateCategory(authorizationId, categoryId, newCategoryName) {
+async function updateCategory(authorizationId, categoryId, newCategoryName, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin){
             const category = await categoryModel.findOneAndUpdate( { _id: categoryId }, { name: newCategoryName });
             if (category) {
                 return {
-                    msg: "Updating Category Process Has Been Successfuly !!",
+                    msg: getSuitableTranslations("Updating Category Process Has Been Successfuly !!", language),
                     error: false,
                     data: {},
                 };
             }
             return {
-                msg: "Sorry, This Category Is Not Exist !!",
+                msg: getSuitableTranslations("Sorry, This Category Is Not Exist !!", language),
                 error: true,
                 data: {},
             };
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }

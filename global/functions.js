@@ -14,6 +14,12 @@ const { compile } = require("ejs");
 
 const sharp = require("sharp");
 
+const arTranslations = require("./translations/ar.json");
+
+const trTranslations = require("./translations/tr.json");
+
+const deTranslations = require("./translations/de.json");
+
 function isEmail(email) {
     return email.match(/[^\s@]+@[^\s@]+\.[^\s@]+/);
 }
@@ -279,6 +285,34 @@ async function handleResizeImagesAndConvertFormatToWebp(files, outputImageFilePa
     }
 }
 
+function processingTranslation(variablesObject, translation) {
+    const variables = Object.keys(variablesObject);
+    if (variables.length > 0) {
+        variables.forEach((variable) => {
+            translation = translation.replace(`{{${variable}}}`, variablesObject[variable]);
+        });
+        return translation;
+    }
+    return translation;
+}
+
+function getSuitableTranslations(msg, language, variables = {}) {
+    if (language) {
+        switch(language) {
+            case "ar": return processingTranslation(variables, arTranslations[msg] ? arTranslations[msg] : msg);
+            case "tr": return processingTranslation(variables, trTranslations[msg] ? trTranslations[msg] : msg);
+            case "de": return processingTranslation(variables, deTranslations[msg] ? deTranslations[msg] : msg);
+            default: return processingTranslation(variables, msg);
+        }
+    }
+    return {
+        en: processingTranslation(variables, msg),
+        ar: processingTranslation(variables, arTranslations[msg] ? arTranslations[msg] : msg),
+        tr: processingTranslation(variables, trTranslations[msg] ? trTranslations[msg] : msg),
+        de: processingTranslation(variables, deTranslations[msg] ? deTranslations[msg] : msg)
+    }
+}
+
 module.exports = {
     isEmail,
     isValidPassword,
@@ -293,5 +327,6 @@ module.exports = {
     getResponseObject,
     checkIsExistValueForFieldsAndDataTypes,
     validateIsExistValueForFieldsAndDataTypes,
-    handleResizeImagesAndConvertFormatToWebp
+    handleResizeImagesAndConvertFormatToWebp,
+    getSuitableTranslations
 }

@@ -4,6 +4,8 @@ const { orderModel, userModel, adminModel, productsWalletModel, productModel, mo
 
 const countries = require("countries-list").countries;
 
+const { getSuitableTranslations } = require("../global/functions");
+
 const isProductLocalOrInternational = (productCountry, shippingCountry) => {
     return countries[productCountry].name === shippingCountry ? "local" : "international";
 }
@@ -26,7 +28,7 @@ const getShippingCost = (localProductsLength, internationalProductsLength, shipp
     return tempShippingCost;
 }
 
-async function getOrdersCount(authorizationId, filters) {
+async function getOrdersCount(authorizationId, filters, language) {
     try {
         const user = filters.destination === "user" ? await userModel.findById(authorizationId) : await adminModel.findById(authorizationId);
         if (user) {
@@ -36,13 +38,13 @@ async function getOrdersCount(authorizationId, filters) {
             }
             delete filters.destination;
             return {
-                msg: "Get Orders Count Process Has Been Successfully !!",
+                msg: getSuitableTranslations("Get Orders Count Process Has Been Successfully !!", language),
                 error: false,
                 data: await orderModel.countDocuments(filters),
             }
         }
         return {
-            msg: `Sorry, This ${user.distination.toUpperCase()} Is Not Exist !!`,
+            msg: getSuitableTranslations(`Sorry, This ${user.distination.toUpperCase()} Is Not Exist !!`, language),
             error: true,
             data: {},
         }
@@ -51,7 +53,7 @@ async function getOrdersCount(authorizationId, filters) {
     }
 }
 
-async function getAllOrdersInsideThePage(authorizationId, pageNumber, pageSize, filters) {
+async function getAllOrdersInsideThePage(authorizationId, pageNumber, pageSize, filters, language) {
     try {
         const user = filters.destination === "user" ? await userModel.findById(authorizationId) : await adminModel.findById(authorizationId);
         if (user) {
@@ -61,13 +63,13 @@ async function getAllOrdersInsideThePage(authorizationId, pageNumber, pageSize, 
             }
             delete filters.destination;
             return {
-                msg: `Get All Orders Inside The Page: ${pageNumber} Process Has Been Successfully !!`,
+                msg: getSuitableTranslations("Get All Orders Inside The Page: {{pageNumber}} Process Has Been Successfully !!", language, { pageNumber }),
                 error: false,
                 data: await orderModel.find(filters).skip((pageNumber - 1) * pageSize).limit(pageSize).sort({ orderNumber: -1 }),
             }
         }
         return {
-            msg: `Sorry, This ${user.distination.toUpperCase()} Is Not Exist !!`,
+            msg: getSuitableTranslations(`Sorry, This ${user.distination.toUpperCase()} Is Not Exist !!`, language),
             error: true,
             data: {},
         }
@@ -76,18 +78,18 @@ async function getAllOrdersInsideThePage(authorizationId, pageNumber, pageSize, 
     }
 }
 
-async function getOrderDetails(orderId) {
+async function getOrderDetails(orderId, language) {
     try {
         const order = await orderModel.findById(orderId);
         if (order) {
             return {
-                msg: `Get Details For Order: ${orderId} Process Has Been Successfully !!`,
+                msg: getSuitableTranslations("Get Orders Details Process Has Been Successfully !!", language),
                 error: false,
                 data: order,
             }
         }
         return {
-            msg: "Sorry, This Order Is Not Found !!",
+            msg: getSuitableTranslations("Sorry, This Order Is Not Found !!", language),
             error: true,
             data: {},
         }
@@ -113,13 +115,13 @@ const isExistOfferOnProduct = (startDateAsString, endDateAsString) => {
     return false;
 }
 
-async function createNewOrder(orderDetails) {
+async function createNewOrder(orderDetails, language) {
     try {
         if (orderDetails.userId) {
             const user = await userModel.findById(orderDetails.userId);
             if (!user) {
                 return {
-                    msg: "Sorry, This User Is Not Exist !!",
+                    msg: getSuitableTranslations("Sorry, This User Is Not Exist !!", language),
                     error: true,
                     data: {},
                 }
@@ -128,7 +130,7 @@ async function createNewOrder(orderDetails) {
         const existOrderProducts = await productModel.find({ _id: { $in: orderDetails.products.map((product) => product.productId) }});
         if (existOrderProducts.length === 0) {
             return {
-                msg: "Sorry, Please Send At Least One Product !!",
+                msg: getSuitableTranslations("Sorry, Please Send At Least One Product !!", language),
                 error: true,
                 data: {},
             }
@@ -144,7 +146,7 @@ async function createNewOrder(orderDetails) {
                 }
                 if (!isExistProduct) {
                     return {
-                        msg: `Sorry, Product Id: ${product.productId} Is Not Exist !!`,
+                        msg: getSuitableTranslations("Sorry, Product Id: {{productId}} Is Not Exist !!", language, { productId: product.productId }),
                         error: true,
                         data: {},
                     }
@@ -156,14 +158,14 @@ async function createNewOrder(orderDetails) {
             if ((new mongoose.Types.ObjectId(orderDetails.products[i].productId)).equals(orderedProducts[i]._id)) {
                 if (orderedProducts[i].quantity === 0) {
                     return {
-                        msg: `Sorry, The Product With The ID ${orderedProducts[i]._id} Is Not Available ( Quantity Is 0 ) !!`,
+                        msg: getSuitableTranslations(`Sorry, The Product With The ID {{productId}} Is Not Available ( Quantity Is 0 ) !!`, language, { productId: orderedProducts[i]._id }),
                         error: true,
                         data: {},
                     }
                 }
                 if (orderDetails.products[i].quantity > orderedProducts[i].quantity) {
                     return {
-                        msg: `Sorry, Quantity For Product Id: ${orderedProducts[i]._id} Greater Than Specific Quantity ( ${orderedProducts[i].quantity} ) !!`,
+                        msg: getSuitableTranslations("Sorry, Quantity For Product Id: {{productId}} Greater Than Specific Quantity ( {{quantity}} ) !!", language, { productId: orderedProducts[i]._id, quantity: orderedProducts[i].quantity}),
                         error: true,
                         data: {},
                     }
@@ -242,7 +244,7 @@ async function createNewOrder(orderDetails) {
             }
         }
         return {
-            msg: "Creating New Order Has Been Successfuly !!",
+            msg: getSuitableTranslations("Creating New Order Has Been Successfuly !!", language),
             error: false,
             data: {
                 totalPriceBeforeDiscount: totalPrices.totalPriceBeforeDiscount,
@@ -265,7 +267,7 @@ async function createNewOrder(orderDetails) {
     }
 }
 
-async function updateOrder(authorizationId, orderId, newOrderDetails) {
+async function updateOrder(authorizationId, orderId, newOrderDetails, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin){
@@ -274,7 +276,7 @@ async function updateOrder(authorizationId, orderId, newOrderDetails) {
                     if (order.checkoutStatus === "Checkout Successfull") {
                         await orderModel.updateOne({ _id: orderId }, { ...newOrderDetails });
                         return {
-                            msg: `Update Details For Order That : ( Id: ${ orderId }) Process Has Been Successfully !!`,
+                            msg: getSuitableTranslations("Update Order Details Process Has Been Successfully !!", language),
                             error: false,
                             data: {
                                 totalPriceBeforeDiscount: order.totalPriceBeforeDiscount,
@@ -294,19 +296,19 @@ async function updateOrder(authorizationId, orderId, newOrderDetails) {
                         }
                     }
                     return {
-                        msg: "Sorry, Permission Denied !!",
+                        msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
                         error: true,
                         data: {},
                     }
                 }
                 return {
-                    msg: "Sorry, This Order Is Not Found !!",
+                    msg: getSuitableTranslations("Sorry, This Order Is Not Found !!", language),
                     error: true,
                     data: {},
                 }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -315,7 +317,7 @@ async function updateOrder(authorizationId, orderId, newOrderDetails) {
     }
 }
 
-async function changeCheckoutStatusToSuccessfull(orderId) {
+async function changeCheckoutStatusToSuccessfull(orderId, language) {
     const order = await orderModel.findOneAndUpdate({ _id: orderId }, { checkoutStatus: "Checkout Successfull" });
     if (order) {
         const totalPrices = {
@@ -329,7 +331,7 @@ async function changeCheckoutStatusToSuccessfull(orderId) {
             totalPrices.totalPriceAfterDiscount = totalPrices.totalPriceBeforeDiscount - totalPrices.totalDiscount;
         }
         return {
-            msg: "Updating Order Checkout Status Process Has Been Successfully !!",
+            msg: getSuitableTranslations("Updating Order Checkout Status Process Has Been Successfully !!", language),
             error: false,
             data: {
                 orderId: order._id,
@@ -345,13 +347,13 @@ async function changeCheckoutStatusToSuccessfull(orderId) {
         }
     }
     return {
-        msg: "Sorry, This Order Is Not Found !!",
+        msg: getSuitableTranslations("Sorry, This Order Is Not Found !!", language),
         error: true,
         data: {},
     }
 }
 
-async function updateOrderProduct(authorizationId, orderId, productId, newOrderProductDetails) {
+async function updateOrderProduct(authorizationId, orderId, productId, newOrderProductDetails, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin){
@@ -366,25 +368,25 @@ async function updateOrderProduct(authorizationId, orderId, productId, newOrderP
                         const { calcOrderAmount } = require("../global/functions");
                         await orderModel.updateOne({ _id: orderId }, { products: order.products, orderAmount: calcOrderAmount(order.products) });
                         return {
-                            msg: "Updating Order Details Process Has Been Successfuly !!",
+                            msg: getSuitableTranslations("Updating Order Details Process Has Been Successfuly !!", language),
                             error: false,
                             data: {},
                         }
                     }
                     return {
-                        msg: `Sorry, This Product For Order Id: ${orderId} Is Not Found !!`,
+                        msg: getSuitableTranslations(`Sorry, This Product For Order Id: ${orderId} Is Not Found !!`, language),
                         error: true,
                         data: {},
                     }
                 }
                 return {
-                    msg: "Sorry, This Order Is Not Found !!",
+                    msg: getSuitableTranslations("Sorry, This Order Is Not Found !!", language),
                     error: true,
                     data: {},
                 }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -393,26 +395,26 @@ async function updateOrderProduct(authorizationId, orderId, productId, newOrderP
     }
 }
 
-async function deleteOrder(authorizationId, orderId){
+async function deleteOrder(authorizationId, orderId, language){
     try{
         const admin = await adminModel.findById(authorizationId);
         if (admin){
             const order = await orderModel.findOneAndUpdate({ _id: orderId }, { isDeleted: true });
             if (order) {
                 return {
-                    msg: "Deleting This Order Has Been Successfuly !!",
+                    msg: getSuitableTranslations("Deleting This Order Has Been Successfuly !!", language),
                     error: false,
                     data: {},
                 }
             }
             return {
-                msg: "Sorry, This Order Is Not Found !!",
+                msg: getSuitableTranslations("Sorry, This Order Is Not Found !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -422,7 +424,7 @@ async function deleteOrder(authorizationId, orderId){
     }
 }
 
-async function deleteProductFromOrder(authorizationId, orderId, productId) {
+async function deleteProductFromOrder(authorizationId, orderId, productId, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin){
@@ -432,7 +434,7 @@ async function deleteProductFromOrder(authorizationId, orderId, productId) {
                 if (newOrderProducts.length < order.products.length) {
                     await orderModel.updateOne({ _id: orderId }, { products: newOrderProducts });
                     return {
-                        msg: "Deleting Product From Order Has Been Successfuly !!",
+                        msg: getSuitableTranslations("Deleting Product From Order Has Been Successfuly !!", language),
                         error: false,
                         data: {
                             newOrderProducts,
@@ -440,19 +442,19 @@ async function deleteProductFromOrder(authorizationId, orderId, productId) {
                     }
                 }
                 return {
-                    msg: `Sorry, This Product For Order Id: ${orderId} Is Not Found !!`,
+                    msg: getSuitableTranslations(`Sorry, This Product For Order Id: ${orderId} Is Not Found !!`, language),
                     error: true,
                     data: {},
                 }
             }
             return {
-                msg: "Sorry, This Order Is Not Found !!",
+                msg: getSuitableTranslations("Sorry, This Order Is Not Found !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }

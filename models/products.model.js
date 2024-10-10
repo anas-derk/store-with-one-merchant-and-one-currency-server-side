@@ -2,7 +2,9 @@
 
 const { productModel, categoryModel, adminModel, mongoose } = require("../models/all.models");
 
-async function addNewProduct(authorizationId, productInfo) {
+const { getSuitableTranslations } = require("../global/functions");
+
+async function addNewProduct(authorizationId, productInfo, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin){
@@ -13,25 +15,25 @@ async function addNewProduct(authorizationId, productInfo) {
                     productInfo.category = category.name;
                     await (new productModel(productInfo)).save();
                     return {
-                        msg: "Adding New Product Process Has Been Successfuly !!",
+                        msg: getSuitableTranslations("Adding New Product Process Has Been Successfuly !!", language),
                         error: false,
                         data: {},
                     }
                 }
                 return {
-                    msg: "Sorry, This Category Is Not Exist !!",
+                    msg: getSuitableTranslations("Sorry, This Category Is Not Exist !!", language),
                     error: true,
                     data: {},
                 }
             }
             return {
-                msg: "Sorry, This Product Is Already Exist !!",
+                msg: getSuitableTranslations("Sorry, This Product Is Already Exist !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -41,7 +43,7 @@ async function addNewProduct(authorizationId, productInfo) {
     }
 }
 
-async function addNewImagesToProductGallery(authorizationId, productId, newGalleryImagePaths) {
+async function addNewImagesToProductGallery(authorizationId, productId, newGalleryImagePaths, language) {
     try{
         const admin = await adminModel.findById(authorizationId);
         if (admin){
@@ -53,7 +55,7 @@ async function addNewImagesToProductGallery(authorizationId, productId, newGalle
                     galleryImagesPaths: galleryImagePathsAfterAddNewPaths,
                 });
                 return {
-                    msg: "Add New Images To Product Gallery Process Has Been Successfuly !!",
+                    msg: getSuitableTranslations("Add New Images To Product Gallery Process Has Been Successfuly !!", language),
                     error: false,
                     data: {
                         galleryImagePathsAfterAddNewPaths,
@@ -61,13 +63,13 @@ async function addNewImagesToProductGallery(authorizationId, productId, newGalle
                 }
             }
             return {
-                msg: "Sorry, This Product Is Not Found !!",
+                msg: getSuitableTranslations("Sorry, This Product Is Not Found !!", language),
                 error: false,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -77,10 +79,10 @@ async function addNewImagesToProductGallery(authorizationId, productId, newGalle
     }
 }
 
-async function getProductsByIds(productsIds) {
+async function getProductsByIds(productsIds, language) {
     try{
         return {
-            msg: "Get Products By Ids Process Has Been Successfully !!",
+            msg: getSuitableTranslations("Get Products By Ids Process Has Been Successfully !!", language),
             error: false,
             data: {
                 products: await productModel.find({ _id: { $in: productsIds }, quantity: { $gte: 1 } }),
@@ -93,12 +95,12 @@ async function getProductsByIds(productsIds) {
     }
 }
 
-async function getProductInfo(productId) {
+async function getProductInfo(productId, language) {
     try {
         const productInfo = await productModel.findById(productId);
         if (productInfo) {
             return {
-                msg: "Get Product Info Process Has Been Successfuly !!",
+                msg: getSuitableTranslations("Get Product Info Process Has Been Successfuly !!", language),
                 error: false,
                 data: {
                     productDetails: productInfo,
@@ -107,7 +109,7 @@ async function getProductInfo(productId) {
             }
         }
         return {
-            msg: "Sorry, This Product It Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Product It Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -117,10 +119,10 @@ async function getProductInfo(productId) {
     }
 }
 
-async function getProductsCount(filters) {
+async function getProductsCount(filters, language) {
     try {
         return {
-            msg: "Get Products Count Process Has Been Successfully !!",
+            msg: getSuitableTranslations("Get Products Count Process Has Been Successfully !!", language),
             error: false,
             data: await productModel.countDocuments(filters),
         }
@@ -130,13 +132,13 @@ async function getProductsCount(filters) {
     }
 }
 
-async function getFlashProductsCount(filters) {
+async function getFlashProductsCount(filters, language) {
     try {
         const currentDate = new Date();
         filters.startDiscountPeriod = { $lte: currentDate };
         filters.endDiscountPeriod = { $gte: currentDate };
         return {
-            msg: "Get Flash Products Count Process Has Been Successfully !!",
+            msg: getSuitableTranslations("Get Flash Products Count Process Has Been Successfully !!", language),
             error: false,
             data: await productModel.countDocuments(filters),
         }
@@ -146,13 +148,13 @@ async function getFlashProductsCount(filters) {
     }
 }
 
-async function getAllFlashProductsInsideThePage(pageNumber, pageSize, filters, sortDetailsObject) {
+async function getAllFlashProductsInsideThePage(pageNumber, pageSize, filters, sortDetailsObject, language) {
     try {
         const currentDate = new Date();
         filters.startDiscountPeriod = { $lte: currentDate };
         filters.endDiscountPeriod = { $gte: currentDate };
         return {
-            msg: `Get Flash Products Inside The Page: ${pageNumber} Process Has Been Successfully !!`,
+            msg: getSuitableTranslations(`Get Flash Products Inside The Page: ${pageNumber} Process Has Been Successfully !!`, language, { pageNumber }),
             error: false,
             data: {
                 products: await productModel
@@ -168,10 +170,10 @@ async function getAllFlashProductsInsideThePage(pageNumber, pageSize, filters, s
     }
 }
 
-async function getAllProductsInsideThePage(pageNumber, pageSize, filters, sortDetailsObject) {
+async function getAllProductsInsideThePage(pageNumber, pageSize, filters, sortDetailsObject, language) {
     try {
         return {
-            msg: `Get Products Inside The Page: ${pageNumber} Process Has Been Successfully !!`,
+            msg: getSuitableTranslations(`Get Products Inside The Page: ${pageNumber} Process Has Been Successfully !!`, language),
             error: false,
             data: {
                 products: await productModel.find(filters).sort(sortDetailsObject).skip((pageNumber - 1) * pageSize).limit(pageSize),
@@ -184,12 +186,12 @@ async function getAllProductsInsideThePage(pageNumber, pageSize, filters, sortDe
     }
 }
 
-async function getRelatedProductsInTheProduct(productId) {
+async function getRelatedProductsInTheProduct(productId, language) {
     try {
         const productInfo = await productModel.findById(productId);
         if (productInfo) {
             return {
-                msg: "Get Sample From Related Products In This Product Process Has Been Successfuly !!",
+                msg: getSuitableTranslations("Get Sample From Related Products In This Product Process Has Been Successfuly !!", language),
                 error: false,
                 data: await productModel.aggregate([
                     { $match: { category: productInfo.category, _id: { $ne: new mongoose.Types.ObjectId(productId) } } },
@@ -198,7 +200,7 @@ async function getRelatedProductsInTheProduct(productId) {
             }
         }
         return {
-            msg: "Sorry, This Product It Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Product It Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -208,26 +210,26 @@ async function getRelatedProductsInTheProduct(productId) {
     }
 }
 
-async function getAllGalleryImages(authorizationId, productId) {
+async function getAllGalleryImages(authorizationId, productId, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin){
             const product = await productModel.findOne({ _id: productId });
             if (product) {
                 return {
-                    msg: "Get All Gallery Images Process Has Been Successfully !!",
+                    msg: getSuitableTranslations("Get All Gallery Images Process Has Been Successfully !!", language),
                     error: false,
                     data: product.galleryImagesPaths,
                 }
             }
             return {
-                msg: "Sorry, This Product Is Not Exist !!",
+                msg: getSuitableTranslations("Sorry, This Product Is Not Exist !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -237,7 +239,7 @@ async function getAllGalleryImages(authorizationId, productId) {
     }
 }
 
-async function deleteProduct(authorizationId, productId) {
+async function deleteProduct(authorizationId, productId, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin){
@@ -246,7 +248,7 @@ async function deleteProduct(authorizationId, productId) {
             });
             if (productInfo) {
                 return {
-                    msg: "Deleting Product Process Has Been Successfuly !!",
+                    msg: getSuitableTranslations("Deleting Product Process Has Been Successfuly !!", language),
                     error: false,
                     data: {
                         deletedProductImagePath: productInfo.imagePath,
@@ -255,13 +257,13 @@ async function deleteProduct(authorizationId, productId) {
                 }
             }
             return {
-                msg: "Sorry, This Product Is Not Exist !!",
+                msg: getSuitableTranslations("Sorry, This Product Is Not Exist !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -271,7 +273,7 @@ async function deleteProduct(authorizationId, productId) {
     }
 }
 
-async function deleteImageFromProductGallery(authorizationId, productId, galleryImagePath) {
+async function deleteImageFromProductGallery(authorizationId, productId, galleryImagePath, language) {
     try{
         const admin = await adminModel.findById(authorizationId);
         if (admin){
@@ -279,19 +281,19 @@ async function deleteImageFromProductGallery(authorizationId, productId, gallery
             if (product) {
                 await productModel.updateOne({ _id: productId }, { galleryImagesPaths: product.galleryImagesPaths.filter((path) => galleryImagePath !== path) });
                 return {
-                    msg: "Deleting Image From Product Gallery Process Has Been Successfully !!",
+                    msg: getSuitableTranslations("Deleting Image From Product Gallery Process Has Been Successfully !!", language),
                     error: false,
                     data: product.imagePath,
                 }
             }
             return {
-                msg: "Sorry, This Product Is Not Exist !!",
+                msg: getSuitableTranslations("Sorry, This Product Is Not Exist !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -301,7 +303,7 @@ async function deleteImageFromProductGallery(authorizationId, productId, gallery
     }
 }
 
-async function updateProduct(authorizationId, productId, newData) {
+async function updateProduct(authorizationId, productId, newData, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin){
@@ -315,19 +317,19 @@ async function updateProduct(authorizationId, productId, newData) {
             const product = await productModel.findOneAndUpdate({ _id: productId }, newData);
             if (product) {
                 return {
-                    msg: "Updating Product Process Has Been Successfully !!",
+                    msg: getSuitableTranslations("Updating Product Process Has Been Successfully !!", language),
                     error: false,
                     data: {},
                 }
             }
             return {
-                msg: "Sorry, This Product Is Not Exist !!",
+                msg: getSuitableTranslations("Sorry, This Product Is Not Exist !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -337,7 +339,7 @@ async function updateProduct(authorizationId, productId, newData) {
     }
 }
 
-async function updateProductGalleryImage(authorizationId, productId, oldGalleryImagePath, newGalleryImagePath) {
+async function updateProductGalleryImage(authorizationId, productId, oldGalleryImagePath, newGalleryImagePath, language) {
     try{
         const admin = await adminModel.findById(authorizationId);
         if (admin){
@@ -350,25 +352,25 @@ async function updateProductGalleryImage(authorizationId, productId, oldGalleryI
                         galleryImagesPaths: product.galleryImagesPaths
                     });
                     return {
-                        msg: "Updating Product Galley Image Process Has Been Successfully !!",
+                        msg: getSuitableTranslations("Updating Product Galley Image Process Has Been Successfully !!", language),
                         error: false,
                         data: newGalleryImagePath,
                     }
                 }
                 return {
-                    msg: "Sorry, This Path Is Not Found !!",
+                    msg: getSuitableTranslations("Sorry, This Path Is Not Found !!", language),
                     error: true,
                     data: {},
                 }
             }
             return {
-                msg: "Sorry, This Product Is Not Exist !!",
+                msg: getSuitableTranslations("Sorry, This Product Is Not Exist !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -378,14 +380,14 @@ async function updateProductGalleryImage(authorizationId, productId, oldGalleryI
     }
 }
 
-async function updateProductImage(authorizationId, productId, newProductImagePath) {
+async function updateProductImage(authorizationId, productId, newProductImagePath, language) {
     try{
         const admin = await adminModel.findById(authorizationId);
         if (admin){
             const product = await productModel.findOneAndUpdate({ _id: productId }, { imagePath: newProductImagePath });
             if (product) {
                 return {
-                    msg: "Change Product Image Process Has Been Successfully !!",
+                    msg: getSuitableTranslations("Change Product Image Process Has Been Successfully !!", language),
                     error: false,
                     data: {
                         deletedProductImagePath: product.imagePath,
@@ -393,13 +395,13 @@ async function updateProductImage(authorizationId, productId, newProductImagePat
                 }
             }
             return {
-                msg: "Sorry, This Product Is Not Exist !!",
+                msg: getSuitableTranslations("Sorry, This Product Is Not Exist !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }

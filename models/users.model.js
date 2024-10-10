@@ -2,6 +2,8 @@
 
 const { userModel, accountVerificationCodesModel, adminModel, productsWalletModel, favoriteProductModel } = require("../models/all.models");
 
+const { getSuitableTranslations } = require("../global/functions");
+
 // require bcryptjs module for password encrypting
 
 const { hash, compare } = require("bcryptjs");
@@ -10,25 +12,21 @@ const { hash, compare } = require("bcryptjs");
 
 async function createNewUser(email, password, language) {
     try {
-        // Check If Email Is Exist
         const user = await userModel.findOne({ email });
         if (user) {
             return {
-                msg: "Sorry, Can't Create User Because it is Exist !!",
+                msg: getSuitableTranslations("Sorry, Can't Create User Because it is Exist !!", language),
                 error: true,
                 data: {},
             }
         }
-        // Create New Document From User Schema
-        const newUser = new userModel({
+        await (new userModel({
             email,
             password: await hash(password, 10),
             language
-        });
-        // Save The New User As Document In User Collection
-        await newUser.save();
+        })).save();
         return {
-            msg: "Ok !!, Create New User Process Has Been Successfuly !!",
+            msg: getSuitableTranslations("Ok !!, Create New User Process Has Been Successfuly !!", language),
             error: false,
             data: {},
         }
@@ -38,7 +36,7 @@ async function createNewUser(email, password, language) {
     }
 }
 
-async function login(email, password) {
+async function login(email, password, language) {
     try {
         // Check If Email Is Exist
         const user = await userModel.findOne({ email });
@@ -47,7 +45,7 @@ async function login(email, password) {
             const isTruePassword = await compare(password, user.password);
             if (isTruePassword) {
                 return {
-                    msg: "Logining Process Has Been Successfully !!",
+                    msg: getSuitableTranslations("Logining Process Has Been Successfully !!", language),
                     error: false,
                     data: {
                         _id: user._id,
@@ -56,13 +54,13 @@ async function login(email, password) {
                 };
             }
             return {
-                msg: "Sorry, Email Or Password Incorrect !!",
+                msg: getSuitableTranslations("Sorry, Email Or Password Incorrect !!", language),
                 error: true,
                 data: {},
             };
         }
         return {
-            msg: "Sorry, Email Or Password Incorrect !!",
+            msg: getSuitableTranslations("Sorry, Email Or Password Incorrect !!", language),
             error: true,
             data: {},
         };
@@ -72,12 +70,12 @@ async function login(email, password) {
     }
 }
 
-async function loginWithGoogle(userInfo) {
+async function loginWithGoogle(userInfo, language) {
     try{
         const user = await userModel.findOne({ email: userInfo.email });
         if (user) {
             return {
-                msg: "Logining Process Has Been Successfully !!",
+                msg: getSuitableTranslations("Logining Process Has Been Successfully !!", language),
                 error: false,
                 data: {
                     _id: user._id,
@@ -85,7 +83,7 @@ async function loginWithGoogle(userInfo) {
                 },
             };
         }
-        const newUser = new userModel({
+        const { _id, isVerified } = await (new userModel({
             email: userInfo.email,
             first_name: userInfo.first_name,
             last_name: userInfo.last_name,
@@ -93,10 +91,9 @@ async function loginWithGoogle(userInfo) {
             password: await hash("anasDerk1999", 10),
             isVerified: true,
             provider: "google",
-        });
-        const { _id, isVerified } = await newUser.save();
+        })).save();
         return {
-            msg: "Logining Process Has Been Successfully !!",
+            msg: getSuitableTranslations("Logining Process Has Been Successfully !!", language),
             error: false,
             data: {
                 _id,
@@ -109,19 +106,18 @@ async function loginWithGoogle(userInfo) {
     }
 }
 
-async function getUserInfo(userId) {
+async function getUserInfo(userId, language) {
     try {
-        // Check If User Is Exist
         const user = await userModel.findById(userId);
         if (user) {
             return {
-                msg: "Get User Info Process Has Been Successfully !!",
+                msg: getSuitableTranslations("Get User Info Process Has Been Successfully !!", language),
                 error: false,
                 data: user,
             }
         }
         return {
-            msg: "Sorry, The User Is Not Exist !!, Please Enter Another User Id ..",
+            msg: getSuitableTranslations("Sorry, The User Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -130,26 +126,25 @@ async function getUserInfo(userId) {
     }
 }
 
-async function isExistUserAndVerificationEmail(email) {
+async function isExistUserAndVerificationEmail(email, language) {
     try {
-        // Check If User Is Exist
         const user = await userModel.findOne({ email });
         if (user) {
             if (!user.isVerified) {
                 return {
-                    msg: "This User Is Exist !!",
+                    msg: getSuitableTranslations("This User Is Exist !!", language),
                     error: false,
                     data: user,
                 };
             }
             return {
-                msg: "Sorry, The Email For This User Has Been Verified !!",
+                msg: getSuitableTranslations("Sorry, The Email For This User Has Been Verified !!", language),
                 error: true,
                 data: {},
             };
         };
         return {
-            msg: "Sorry, The User Is Not Exist !!, Please Enter Another User Email ..",
+            msg: getSuitableTranslations("Sorry, The User Is Not Exist !!", language),
             error: true,
             data: {},
         };
@@ -158,25 +153,25 @@ async function isExistUserAndVerificationEmail(email) {
     }
 }
 
-async function getUsersCount(authorizationId, filters) {
+async function getUsersCount(authorizationId, filters, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin) {
             if (admin.isWebsiteOwner) {
                 return {
-                    msg: "Get Users Count Process Has Been Successfully !!",
+                    msg: getSuitableTranslations("Get Users Count Process Has Been Successfully !!", language),
                     error: false,
                     data: await userModel.countDocuments(filters),
                 }
             }
             return {
-                msg: "Sorry, Permission Denied !!",
+                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -185,25 +180,25 @@ async function getUsersCount(authorizationId, filters) {
     }
 }
 
-async function getAllUsersInsideThePage(authorizationId, pageNumber, pageSize, filters) {
+async function getAllUsersInsideThePage(authorizationId, pageNumber, pageSize, filters, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin) {
             if (admin.isWebsiteOwner) {
                 return {
-                    msg: `Get All Users Inside The Page: ${pageNumber} Process Has Been Successfully !!`,
+                    msg: getSuitableTranslations("Get All Users Inside The Page: {{pageNumber}} Process Has Been Successfully !!", language, { pageNumber }),
                     error: false,
                     data: await userModel.find(filters).skip((pageNumber - 1) * pageSize).limit(pageSize).sort({ dateOfCreation: -1 }),
                 }
             }
             return {
-                msg: "Sorry, Permission Denied !!",
+                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -212,13 +207,13 @@ async function getAllUsersInsideThePage(authorizationId, pageNumber, pageSize, f
     }
 }
 
-async function isExistUserAccount(email, userType) {
+async function isExistUserAccount(email, userType, language) {
     try {
         if (userType === "user") {
             const user = await userModel.findOne({ email });
             if (user) {
                 return {
-                    msg: "User Is Exist !!",
+                    msg: getSuitableTranslations("User Is Exist !!", language),
                     error: false,
                     data: {
                         _id: user._id,
@@ -227,7 +222,7 @@ async function isExistUserAccount(email, userType) {
                 }
             }
             return {
-                msg: "Sorry, This User Is Not Found !!",
+                msg: getSuitableTranslations("Sorry, This User Is Not Found !!", language),
                 error: true,
                 data: {},
             }
@@ -235,7 +230,7 @@ async function isExistUserAccount(email, userType) {
         const admin = await adminModel.findOne({ email });
         if (admin) {
             return {
-                msg: "Admin Is Exist !!",
+                msg: getSuitableTranslations("Admin Is Exist !!", language),
                 error: false,
                 data: {
                     _id: admin._id,
@@ -243,7 +238,7 @@ async function isExistUserAccount(email, userType) {
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Found !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Found !!", language),
             error: true,
             data: {},
         }
@@ -252,7 +247,7 @@ async function isExistUserAccount(email, userType) {
     }
 }
 
-async function updateUserInfo(userId, newUserData) {
+async function updateUserInfo(userId, newUserData, language) {
     try {
         const userInfo = await userModel.findById(userId);
         if (userInfo) {
@@ -260,7 +255,7 @@ async function updateUserInfo(userId, newUserData) {
             if (newUserData.password && newUserData.newPassword) {
                 if (!await compare(newUserData.password, userInfo.password)) {
                     return {
-                        msg: "Sorry, This Password Is Uncorrect !!",
+                        msg: getSuitableTranslations("Sorry, This Password Is Uncorrect !!", language),
                         error: true,
                         data: {},
                     }
@@ -274,7 +269,7 @@ async function updateUserInfo(userId, newUserData) {
                 const user = await userModel.findOne({ email: newUserData.email });
                 if (user) {
                     return {
-                        msg: "Sorry, This Email Are Already Exist !!",
+                        msg: getSuitableTranslations("Sorry, This Email Are Already Exist !!", language),
                         error: true,
                         data: {},
                     }
@@ -282,29 +277,28 @@ async function updateUserInfo(userId, newUserData) {
             }
             await userModel.updateOne({ _id: userId }, newUserInfo);
             return {
-                msg: "Updating User Info Process Has Been Successfuly !!",
+                msg: getSuitableTranslations("Updating User Info Process Has Been Successfuly !!", language),
                 error: false,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This User Is Not Found !!",
+            msg: getSuitableTranslations("Sorry, This User Is Not Found !!", language),
             error: true,
             data: {},
         }
     } catch (err) {
-        console.log(err)
         throw Error(err);
     }
 }
 
-async function updateVerificationStatus(email) {
+async function updateVerificationStatus(email, language) {
     try{
         const userInfo = await userModel.findOneAndUpdate({ email }, { isVerified: true });
         if(userInfo) {
             await accountVerificationCodesModel.deleteOne({ email, typeOfUse: "to activate account" });
             return {
-                msg: "Updating Verification Status Process Has Been Successfully !!",
+                msg: getSuitableTranslations("Updating Verification Status Process Has Been Successfully !!", language),
                 error: false ,
                 data: {
                     _id: userInfo._id,
@@ -313,7 +307,7 @@ async function updateVerificationStatus(email) {
             };
         }
         return {
-            msg: "Sorry, This User Is Not Found !!",
+            msg: getSuitableTranslations("Sorry, This User Is Not Found !!", language),
             error: true,
             data: {},
         };
@@ -323,13 +317,13 @@ async function updateVerificationStatus(email) {
     }
 }
 
-async function resetUserPassword(email, userType, newPassword) {
+async function resetUserPassword(email, userType, newPassword, language) {
     try {
         if (userType === "user") {
             const user = await userModel.findOneAndUpdate({ email }, { password: await hash(newPassword, 10) });
             if (user) {
                 return {
-                    msg: "Reseting Password Process Has Been Successfully !!",
+                    msg: getSuitableTranslations("Reseting Password Process Has Been Successfully !!", language),
                     error: false,
                     data: {
                         language: user.language,
@@ -345,7 +339,7 @@ async function resetUserPassword(email, userType, newPassword) {
         const admin = await adminModel.findOneAndUpdate({ email }, { password: await hash(newPassword, 10) });
         if (admin) {
             return {
-                msg: "Reseting Password Process Has Been Successfully !!",
+                msg: getSuitableTranslations("Reseting Password Process Has Been Successfully !!", language),
                 error: false,
                 data: {
                     language: admin.language,
@@ -353,7 +347,7 @@ async function resetUserPassword(email, userType, newPassword) {
             };
         }
         return {
-            msg: "Sorry, This Admin Is Not Found !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Found !!", language),
             error: true,
             data: {},
         }
@@ -362,7 +356,7 @@ async function resetUserPassword(email, userType, newPassword) {
     }
 }
 
-async function deleteUser(authorizationId, userId){
+async function deleteUser(authorizationId, userId, language){
     try{
         const admin = await adminModel.findById(authorizationId);
         if (admin) {
@@ -372,25 +366,25 @@ async function deleteUser(authorizationId, userId){
                     await productsWalletModel.deleteMany({ userId });
                     await favoriteProductModel.deleteMany({ userId });
                     return {
-                        msg: "Deleting User Process Has Been Successfully !!",
+                        msg: getSuitableTranslations("Deleting User Process Has Been Successfully !!", language),
                         error: false,
                         data: {},
                     }
                 }
                 return {
-                    msg: "Sorry, This User Is Not Found !!",
+                    msg: getSuitableTranslations("Sorry, This User Is Not Found !!", language),
                     error: true,
                     data: {},
                 }
             }
             return {
-                msg: "Sorry, Permission Denied !!",
+                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }

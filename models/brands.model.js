@@ -1,20 +1,22 @@
 // Import Brand Model Object
 
+const { getSuitableTranslations } = require("../global/functions");
+
 const { brandModel, adminModel } = require("../models/all.models");
 
-async function addNewBrand(authorizationId, brandInfo) {
+async function addNewBrand(authorizationId, brandInfo, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin){
             await (new brandModel(brandInfo)).save();
             return {
-                msg: "Adding New Brand Process Has Been Successfuly ...",
+                msg: getSuitableTranslations("Adding New Brand Process Has Been Successfuly !!", language),
                 error: false,
                 data: {},
             };
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -24,10 +26,10 @@ async function addNewBrand(authorizationId, brandInfo) {
     }
 }
 
-async function getLastSevenBrands(filters) {
+async function getLastSevenBrands(filters, language) {
     try {
         return {
-            msg: "Get All Brands Process Has Been Successfully !!",
+            msg: getSuitableTranslations("Get All Brands Process Has Been Successfully !!", language),
             error: false,
             data: await brandModel.find(filters).limit(7),
         }
@@ -37,10 +39,10 @@ async function getLastSevenBrands(filters) {
     }
 }
 
-async function getBrandsCount(filters) {
+async function getBrandsCount(filters, language) {
     try {
         return {
-            msg: "Get Brands Count Process Has Been Successfully !!",
+            msg: getSuitableTranslations("Get Brands Count Process Has Been Successfully !!", language),
             error: false,
             data: await brandModel.countDocuments(filters),
         }
@@ -50,10 +52,10 @@ async function getBrandsCount(filters) {
     }
 }
 
-async function getAllBrandsInsideThePage(pageNumber, pageSize, filters) {
+async function getAllBrandsInsideThePage(pageNumber, pageSize, filters, language) {
     try {
         return {
-            msg: `Get All Brands Inside The Page: ${pageNumber} Process Has Been Successfully !!`,
+            msg: getSuitableTranslations("Get All Brands Inside The Page: {{pageNumber}} Process Has Been Successfully !!", language, { pageNumber }),
             error: false,
             data: await brandModel.find(filters).skip((pageNumber - 1) * pageSize).limit(pageSize),
         };
@@ -63,7 +65,7 @@ async function getAllBrandsInsideThePage(pageNumber, pageSize, filters) {
     }
 }
 
-async function deleteBrand(authorizationId, brandId) {
+async function deleteBrand(authorizationId, brandId, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin){
@@ -73,20 +75,20 @@ async function deleteBrand(authorizationId, brandId) {
             if (brandInfo) {
                 return {
                     error: false,
-                    msg: "Deleting Brand Process Has Been Successfuly ...",
+                    msg: getSuitableTranslations("Deleting Brand Process Has Been Successfuly !!", language),
                     data: {
                         deletedBrandPath: brandInfo.imagePath,
                     },
                 }
             }
             return {
-                msg: "Sorry, This Brand Id Is Not Exist !!",
+                msg: getSuitableTranslations("Sorry, This Brand Id Is Not Exist !!", language),
                 error: true,
                 data: {},
             };
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -96,26 +98,26 @@ async function deleteBrand(authorizationId, brandId) {
     }
 }
 
-async function updateBrandInfo(authorizationId, brandId, newBrandTitle) {
+async function updateBrandInfo(authorizationId, brandId, newBrandTitle, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin){
             const brandInfo = await brandModel.findOneAndUpdate({ _id: brandId }, { title: newBrandTitle });
             if (brandInfo) {
                 return {
-                    msg:  "Updating Brand Info Process Has Been Successfuly ...",
+                    msg: getSuitableTranslations("Updating Brand Info Process Has Been Successfuly !!", language),
                     error: false,
                     data: {},
                 }
             }
             return {
-                msg: "Sorry, This Brand Is Not Exist !!",
+                msg: getSuitableTranslations("Sorry, This Brand Is Not Exist !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -125,26 +127,26 @@ async function updateBrandInfo(authorizationId, brandId, newBrandTitle) {
     }
 }
 
-async function changeBrandImage(authorizationId, brandId, newBrandImagePath) {
+async function changeBrandImage(authorizationId, brandId, newBrandImagePath, language) {
     try{
         const admin = await adminModel.findById(authorizationId);
         if (admin){
             const brand = await brandModel.findOneAndUpdate({ _id: brandId }, { imagePath: newBrandImagePath });
             if (brand) {
                 return {
-                    msg: "Updating Brand Image Process Has Been Successfully !!",
+                    msg: getSuitableTranslations("Updating Brand Image Process Has Been Successfully !!", language),
                     error: false,
                     data: { deletedBrandImagePath: brand.imagePath }
                 }
             }
             return {
-                msg: "Sorry, This Brand Is Not Exist !!",
+                msg: getSuitableTranslations("Sorry, This Brand Is Not Exist !!", language),
                 error: true,
                 data: {}
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }

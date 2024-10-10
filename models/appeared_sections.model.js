@@ -1,11 +1,13 @@
 // Import Admin Model Object
 
+const { getSuitableTranslations } = require("../global/functions");
+
 const { appearedSectionsModel, adminModel } = require("../models/all.models");
 
-async function getAllSections() {
+async function getAllSections(language) {
     try {
         return {
-            msg: "Get All Sections Process Has Been Successfully !!",
+            msg: getSuitableTranslations("Get All Sections Process Has Been Successfully !!", language),
             error: false,
             data: await appearedSectionsModel.find({}),
         }
@@ -14,7 +16,7 @@ async function getAllSections() {
     }
 }
 
-async function updateSectionsStatus(authorizationId,sectionsStatus) {
+async function updateSectionsStatus(authorizationId, sectionsStatus, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin) {
@@ -23,19 +25,19 @@ async function updateSectionsStatus(authorizationId,sectionsStatus) {
                     await appearedSectionsModel.updateOne({ _id: sectionsStatus[i]._id }, { isAppeared: sectionsStatus[i].isAppeared });
                 }
                 return {
-                    msg: "Updating Section Status Has Been Successfully !!",
+                    msg: getSuitableTranslations("Updating Section Status Has Been Successfully !!", language),
                     error: false,
                     data: {},
                 }
             }
             return {
-                msg: "Sorry, Permission Denied !!",
+                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }

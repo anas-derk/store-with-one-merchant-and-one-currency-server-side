@@ -6,37 +6,29 @@ const { compare, hash } = require("bcryptjs");
 
 const { mongoose } = require("../server");
 
-async function adminLogin(email, password) {
+const { getSuitableTranslations } = require("../global/functions");
+
+async function adminLogin(email, password, language) {
     try {
         const admin = await adminModel.findOne({ email });
         if (admin) {
-            if (!admin.isBlocked) {
-                const isTruePassword = await compare(password, admin.password);
-                if (isTruePassword)
-                    return {
-                        msg: "Admin Logining Process Has Been Successfully !!",
-                        error: false,
-                        data: {
-                            _id: admin._id,
-                        },
-                    };
+            const isTruePassword = await compare(password, admin.password);
+            if (isTruePassword)
                 return {
-                    msg: "Sorry, The Email Or Password Is Not Valid !!",
-                    error: true,
-                    data: {},
-                }
-            }
+                    msg: getSuitableTranslations("Admin Logining Process Has Been Successfully !!", language),
+                    error: false,
+                    data: {
+                        _id: admin._id,
+                    },
+                };
             return {
-                msg: `Sorry, This Account Has Been Blocked !!`,
+                msg: getSuitableTranslations("Sorry, The Email Or Password Is Not Valid !!", language),
                 error: true,
-                data: {
-                    blockingDate: admin.blockingDate,
-                    blockingReason: admin.blockingReason,
-                },
+                data: {},
             }
         }
         return {
-            msg: "Sorry, The Email Or Password Is Not Valid !!",
+            msg: getSuitableTranslations("Sorry, The Email Or Password Is Not Valid !!", language),
             error: true,
             data: {},
         }
@@ -46,19 +38,18 @@ async function adminLogin(email, password) {
     }
 }
 
-async function getAdminUserInfo(userId) {
+async function getAdminUserInfo(userId, language) {
     try {
-        // Check If User Is Exist
         const user = await adminModel.findById(userId);
         if (user) {
             return {
-                msg: `Get Admin Info For Id: ${user._id} Process Has Been Successfully !!`,
+                msg: getSuitableTranslations("Get Admin Info Process Has Been Successfully !!", language),
                 error: false,
                 data: user,
             }
         }
         return {
-            msg: "Sorry, The User Is Not Exist, Please Enter Another User Id !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -67,25 +58,25 @@ async function getAdminUserInfo(userId) {
     }
 }
 
-async function getAdminsCount(superAdminId, filters) {
+async function getAdminsCount(superAdminId, filters, language) {
     try {
         const admin = await adminModel.findById(superAdminId);
         if (admin) {
             if (admin.isSuperAdmin) {
                 return {
-                    msg: "Get Admins Count Process Has Been Successfully !!",
+                    msg: getSuitableTranslations("Get Admins Count Process Has Been Successfully !!", language),
                     error: false,
                     data: await adminModel.countDocuments(filters),
                 }
             }
             return {
-                msg: "Sorry, Permission Denied !!",
+                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Merchant Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -94,25 +85,25 @@ async function getAdminsCount(superAdminId, filters) {
     }
 }
 
-async function getAllAdminsInsideThePage(superAdminId, pageNumber, pageSize, filters) {
+async function getAllAdminsInsideThePage(superAdminId, pageNumber, pageSize, filters, language) {
     try {
         const admin = await adminModel.findById(superAdminId);
         if (admin) {
             if (admin.isSuperAdmin) {
                 return {
-                    msg: `Get All Admins Inside The Page: ${pageNumber} Process Has Been Successfully !!`,
+                    msg: getSuitableTranslations("Get All Admins Inside The Page: {{pageNumber}} Process Has Been Successfully !!", language, { pageNumber }),
                     error: false,
                     data: await adminModel.find(filters).skip((pageNumber - 1) * pageSize).limit(pageSize).sort({ creatingDate: -1 }),
                 }
             }
             return {
-                msg: "Sorry, Permission Denied !!",
+                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Merchant Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -121,7 +112,7 @@ async function getAllAdminsInsideThePage(superAdminId, pageNumber, pageSize, fil
     }
 }
 
-async function addNewAdmin(superAdminId, adminInfo) {
+async function addNewAdmin(superAdminId, adminInfo, language) {
     try{
         const admin = await adminModel.findById(superAdminId);
         if (admin) {
@@ -206,25 +197,25 @@ async function addNewAdmin(superAdminId, adminInfo) {
                         ],
                     })).save();
                     return {
-                        msg: "Create New Admin Process Has Been Successfully !!",
+                        msg: getSuitableTranslations("Create New Admin Process Has Been Successfully !!", language),
                         error: false,
                         data: {},
                     }
                 }
                 return {
-                    msg: "Sorry, This Admin Is Already Exist !!",
+                    msg: getSuitableTranslations("Sorry, This Admin Is Already Exist !!", language),
                     error: true,
                     data: {},
                 }
             }
             return {
-                msg: "Sorry, Permission Denied !!",
+                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -234,7 +225,7 @@ async function addNewAdmin(superAdminId, adminInfo) {
     }
 }
 
-async function updateAdminInfo(superAdminId, adminId, newAdminDetails) {
+async function updateAdminInfo(superAdminId, adminId, newAdminDetails, language) {
     try {
         const admin = await adminModel.findById(superAdminId);
         if (admin) {
@@ -242,25 +233,25 @@ async function updateAdminInfo(superAdminId, adminId, newAdminDetails) {
                 const adminDetails = await adminModel.findOneAndUpdate({ _id: adminId }, newAdminDetails);
                 if (adminDetails) {
                     return {
-                        msg: "Updating Admin Details Process Has Been Successfully !!",
+                        msg: getSuitableTranslations("Updating Admin Details Process Has Been Successfully !!", language),
                         error: false,
                         data: {},
                     }
                 }
                 return {
-                    msg: "Sorry, This Admin Is Not Exist !!",
+                    msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
                     error: true,
                     data: {},
                 }
             }
             return {
-                msg: "Sorry, Permission Denied !!",
+                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -269,14 +260,14 @@ async function updateAdminInfo(superAdminId, adminId, newAdminDetails) {
     }
 }
 
-async function deleteAdmin(superAdminId, adminId){
+async function deleteAdmin(superAdminId, adminId, language){
     try{
         const admin = await adminModel.findById(superAdminId);
         if (admin) {
             if (admin.isSuperAdmin){
                 if ((new mongoose.Types.ObjectId(adminId)).equals(superAdminId)) {
                     return {
-                        msg: "Sorry, Permission Denied !!",
+                        msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
                         error: true,
                         data: {},
                     }
@@ -284,25 +275,25 @@ async function deleteAdmin(superAdminId, adminId){
                 const adminDetails = await adminModel.findOneAndDelete({ _id: adminId });
                 if (adminDetails) {
                     return {
-                        msg: "Delete Admin Process Has Been Successfully !!",
+                        msg: getSuitableTranslations("Delete Admin Process Has Been Successfully !!"),
                         error: false,
                         data: {},
                     }
                 }
                 return {
-                    msg: "Sorry, This Admin Is Not Exist !!",
+                    msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
                     error: true,
                     data: {},
                 }
             }
             return {
-                msg: "Sorry, Permission Denied !!",
+                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: "Sorry, This Admin Is Not Exist !!",
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
             error: true,
             data: {},
         }
