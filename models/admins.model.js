@@ -22,13 +22,13 @@ async function adminLogin(email, password, language) {
                     },
                 };
             return {
-                msg: getSuitableTranslations("Sorry, The Email Or Password Is Not Valid !!", language),
+                msg: getSuitableTranslations("Sorry, The Email Or Password Incorrect !!", language),
                 error: true,
                 data: {},
             }
         }
         return {
-            msg: getSuitableTranslations("Sorry, The Email Or Password Is Not Valid !!", language),
+            msg: getSuitableTranslations("Sorry, The Email Or Password Incorrect !!", language),
             error: true,
             data: {},
         }
@@ -70,7 +70,7 @@ async function getAdminsCount(superAdminId, filters, language) {
                 }
             }
             return {
-                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
+                msg: getSuitableTranslations("Sorry, Permission Denied Because This Admin Is Not Super Admin !!", language),
                 error: true,
                 data: {},
             }
