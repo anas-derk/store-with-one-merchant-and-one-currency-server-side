@@ -33,16 +33,13 @@ async function changeBussinessEmailPassword(authorizationId, email, password, ne
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin){
-            if (admin.isWebsiteOwner) {
+            if (admin.isSuperAdmin) {
                 const user = await globalPasswordModel.findOne({ email });
                 if (user) {
-                    const bytes = cryptoJS.AES.decrypt(user.password, process.env.secretKey);
-                    const decryptedPassword = bytes.toString(cryptoJS.enc.Utf8);
-                    if (decryptedPassword === password) {
-                        const encrypted_password = cryptoJS.AES.encrypt(newPassword, process.env.secretKey).toString();
-                        await globalPasswordModel.updateOne({ password: encrypted_password });
+                    if (cryptoJS.AES.decrypt(user.password, process.env.secretKey).toString(cryptoJS.enc.Utf8) === password) {
+                        await globalPasswordModel.updateOne({ password: cryptoJS.AES.encrypt(newPassword, process.env.secretKey).toString() });
                         return {
-                            msg: getSuitableTranslations("Changing Global Password Process Has Been Successfully !!", language),
+                            msg: getSuitableTranslations("Changing Bussiness Email Password Process Has Been Successfully !!", language),
                             error: false,
                             data: {},
                         }

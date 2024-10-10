@@ -44,7 +44,7 @@ async function getOrdersCount(authorizationId, filters, language) {
             }
         }
         return {
-            msg: getSuitableTranslations(`Sorry, This ${user.distination.toUpperCase()} Is Not Exist !!`, language),
+            msg: getSuitableTranslations(`Sorry, This ${user.distination.replace(user.distination[0], user.distination[0].toUpperCase())} Is Not Exist !!`, language),
             error: true,
             data: {},
         }
@@ -69,7 +69,7 @@ async function getAllOrdersInsideThePage(authorizationId, pageNumber, pageSize, 
             }
         }
         return {
-            msg: getSuitableTranslations(`Sorry, This ${user.distination.toUpperCase()} Is Not Exist !!`, language),
+            msg: getSuitableTranslations(`Sorry, This ${user.distination.replace(user.distination[0], user.distination[0].toUpperCase())} Is Not Exist !!`, language),
             error: true,
             data: {},
         }
@@ -83,7 +83,7 @@ async function getOrderDetails(orderId, language) {
         const order = await orderModel.findById(orderId);
         if (order) {
             return {
-                msg: getSuitableTranslations("Get Orders Details Process Has Been Successfully !!", language),
+                msg: getSuitableTranslations("Get Order Details Process Has Been Successfully !!", language),
                 error: false,
                 data: order,
             }
@@ -158,7 +158,7 @@ async function createNewOrder(orderDetails, language) {
             if ((new mongoose.Types.ObjectId(orderDetails.products[i].productId)).equals(orderedProducts[i]._id)) {
                 if (orderedProducts[i].quantity === 0) {
                     return {
-                        msg: getSuitableTranslations(`Sorry, The Product With The ID {{productId}} Is Not Available ( Quantity Is 0 ) !!`, language, { productId: orderedProducts[i]._id }),
+                        msg: getSuitableTranslations("Sorry, The Product With The ID: {{productId}} Is Not Available ( Quantity Is 0 ) !!", language, { productId: orderedProducts[i]._id }),
                         error: true,
                         data: {},
                     }
@@ -276,7 +276,7 @@ async function updateOrder(authorizationId, orderId, newOrderDetails, language) 
                     if (order.checkoutStatus === "Checkout Successfull") {
                         await orderModel.updateOne({ _id: orderId }, { ...newOrderDetails });
                         return {
-                            msg: getSuitableTranslations("Update Order Details Process Has Been Successfully !!", language),
+                            msg: getSuitableTranslations("Updating Order Details Process Has Been Successfuly !!", language),
                             error: false,
                             data: {
                                 totalPriceBeforeDiscount: order.totalPriceBeforeDiscount,
@@ -296,7 +296,7 @@ async function updateOrder(authorizationId, orderId, newOrderDetails, language) 
                         }
                     }
                     return {
-                        msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
+                        msg: getSuitableTranslations("Sorry, Permission Denied Because This Order Is Not Completed ( Not Payment ) !!", language),
                         error: true,
                         data: {},
                     }
@@ -331,7 +331,7 @@ async function changeCheckoutStatusToSuccessfull(orderId, language) {
             totalPrices.totalPriceAfterDiscount = totalPrices.totalPriceBeforeDiscount - totalPrices.totalDiscount;
         }
         return {
-            msg: getSuitableTranslations("Updating Order Checkout Status Process Has Been Successfully !!", language),
+            msg: getSuitableTranslations("Updating Order Checkout Status To Successfull Process Has Been Successfully !!", language),
             error: false,
             data: {
                 orderId: order._id,
@@ -442,7 +442,7 @@ async function deleteProductFromOrder(authorizationId, orderId, productId, langu
                     }
                 }
                 return {
-                    msg: getSuitableTranslations(`Sorry, This Product For Order Id: ${orderId} Is Not Found !!`, language),
+                    msg: getSuitableTranslations("Sorry, This Product For This Order Is Not Found !!", language),
                     error: true,
                     data: {},
                 }
