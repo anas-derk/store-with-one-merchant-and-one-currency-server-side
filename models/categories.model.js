@@ -60,7 +60,7 @@ async function getCategoryInfo(categoryId, language) {
             }
         }
         return {
-            msg: getSuitableTranslations("Sorry, This Category It Not Exist !!", language),
+            msg: getSuitableTranslations("Sorry, This Category Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -73,7 +73,7 @@ async function getCategoryInfo(categoryId, language) {
 async function getCategoriesCount(filters, language) {
     try {
         return {
-            msg: getSuitableTranslations("Get All Categories Process Has Been Successfully !!", language),
+            msg: getSuitableTranslations("Get Categories Count Process Has Been Successfully !!", language),
             error: false,
             data: await categoryModel.countDocuments(filters),
         }
@@ -135,7 +135,7 @@ async function updateCategory(authorizationId, categoryId, newCategoryName, lang
             const category = await categoryModel.findOneAndUpdate( { _id: categoryId }, { name: newCategoryName });
             if (category) {
                 return {
-                    msg: getSuitableTranslations("Updating Category Process Has Been Successfuly !!", language),
+                    msg: getSuitableTranslations("Updating Category Info Process Has Been Successfuly !!", language),
                     error: false,
                     data: {},
                 };

@@ -29,7 +29,7 @@ async function addNewBrand(authorizationId, brandInfo, language) {
 async function getLastSevenBrands(filters, language) {
     try {
         return {
-            msg: getSuitableTranslations("Get All Brands Process Has Been Successfully !!", language),
+            msg: getSuitableTranslations("Get Last Seven Brands Process Has Been Successfully !!", language),
             error: false,
             data: await brandModel.find(filters).limit(7),
         }
@@ -82,7 +82,7 @@ async function deleteBrand(authorizationId, brandId, language) {
                 }
             }
             return {
-                msg: getSuitableTranslations("Sorry, This Brand Id Is Not Exist !!", language),
+                msg: getSuitableTranslations("Sorry, This Brand Is Not Exist !!", language),
                 error: true,
                 data: {},
             };

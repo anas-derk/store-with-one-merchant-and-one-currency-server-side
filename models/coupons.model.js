@@ -54,7 +54,7 @@ async function addNewCoupon(adminId, couponInfo, language) {
             if (!couponDetails) {
                 await(new couponModel(couponInfo)).save();
                 return {
-                    msg: getSuitableTranslations("Create New Coupon Process Has Been Successfully !!", language),
+                    msg: getSuitableTranslations("Creating New Coupon Process Has Been Successfully !!", language),
                     error: false,
                     data: {},
                 }
@@ -119,7 +119,7 @@ async function deleteCoupon(adminId, couponId, language){
             const couponDetails = await couponModel.findOneAndDelete({ _id: couponId });
             if (couponDetails) {
                 return {
-                    msg: getSuitableTranslations("Delete Coupon Process Has Been Successfully !!", language),
+                    msg: getSuitableTranslations("Deleting Coupon Process Has Been Successfully !!", language),
                     error: false,
                     data: {},
                 }

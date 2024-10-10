@@ -20,18 +20,18 @@ async function updateSectionsStatus(authorizationId, sectionsStatus, language) {
     try {
         const admin = await adminModel.findById(authorizationId);
         if (admin) {
-            if (admin.isWebsiteOwner) {
+            if (admin.isSuperAdmin) {
                 for (let i = 0; i < 4; i++) {
                     await appearedSectionsModel.updateOne({ _id: sectionsStatus[i]._id }, { isAppeared: sectionsStatus[i].isAppeared });
                 }
                 return {
-                    msg: getSuitableTranslations("Updating Section Status Has Been Successfully !!", language),
+                    msg: getSuitableTranslations("Updating Sections Status Has Been Successfully !!", language),
                     error: false,
                     data: {},
                 }
             }
             return {
-                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
+                msg: getSuitableTranslations("Sorry, Permission Denied Because This Admin Is Not Super Admin !!", language),
                 error: true,
                 data: {},
             }
