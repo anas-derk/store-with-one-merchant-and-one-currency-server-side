@@ -38,12 +38,9 @@ async function createNewUser(email, password, language) {
 
 async function login(email, password, language) {
     try {
-        // Check If Email Is Exist
         const user = await userModel.findOne({ email });
         if (user) {
-            // Check From Password
-            const isTruePassword = await compare(password, user.password);
-            if (isTruePassword) {
+            if (await compare(password, user.password)) {
                 return {
                     msg: getSuitableTranslations("Logining Process Has Been Successfully !!", language),
                     error: false,
@@ -85,10 +82,10 @@ async function loginByGoogle(userInfo, language) {
         }
         const { _id, isVerified } = await (new userModel({
             email: userInfo.email,
-            first_name: userInfo.first_name,
-            last_name: userInfo.last_name,
-            preview_name: userInfo.preview_name,
-            password: await hash("anasDerk1999", 10),
+            firstName: userInfo.firstName,
+            lastName: userInfo.lastName,
+            previewName: userInfo.previewName,
+            password: await hash(process.env.secretKey, 10),
             isVerified: true,
             provider: "google",
         })).save();
