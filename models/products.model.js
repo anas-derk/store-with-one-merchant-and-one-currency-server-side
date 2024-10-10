@@ -109,7 +109,7 @@ async function getProductInfo(productId, language) {
             }
         }
         return {
-            msg: getSuitableTranslations("Sorry, This Product It Not Exist !!", language),
+            msg: getSuitableTranslations("Sorry, This Product Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -154,7 +154,7 @@ async function getAllFlashProductsInsideThePage(pageNumber, pageSize, filters, s
         filters.startDiscountPeriod = { $lte: currentDate };
         filters.endDiscountPeriod = { $gte: currentDate };
         return {
-            msg: getSuitableTranslations(`Get Flash Products Inside The Page: ${pageNumber} Process Has Been Successfully !!`, language, { pageNumber }),
+            msg: getSuitableTranslations("Get All Flash Products Inside The Page: {{pageNumber}} Process Has Been Successfully !!", language, { pageNumber }),
             error: false,
             data: {
                 products: await productModel
@@ -173,7 +173,7 @@ async function getAllFlashProductsInsideThePage(pageNumber, pageSize, filters, s
 async function getAllProductsInsideThePage(pageNumber, pageSize, filters, sortDetailsObject, language) {
     try {
         return {
-            msg: getSuitableTranslations(`Get Products Inside The Page: ${pageNumber} Process Has Been Successfully !!`, language),
+            msg: getSuitableTranslations("Get All Products Inside The Page: {{pageNumber}} Process Has Been Successfully !!", language),
             error: false,
             data: {
                 products: await productModel.find(filters).sort(sortDetailsObject).skip((pageNumber - 1) * pageSize).limit(pageSize),
@@ -200,7 +200,7 @@ async function getRelatedProductsInTheProduct(productId, language) {
             }
         }
         return {
-            msg: getSuitableTranslations("Sorry, This Product It Not Exist !!", language),
+            msg: getSuitableTranslations("Sorry, This Product Is Not Exist !!", language),
             error: true,
             data: {},
         }
@@ -317,7 +317,7 @@ async function updateProduct(authorizationId, productId, newData, language) {
             const product = await productModel.findOneAndUpdate({ _id: productId }, newData);
             if (product) {
                 return {
-                    msg: getSuitableTranslations("Updating Product Process Has Been Successfully !!", language),
+                    msg: getSuitableTranslations("Updating Product Info Process Has Been Successfully !!", language),
                     error: false,
                     data: {},
                 }
@@ -387,7 +387,7 @@ async function updateProductImage(authorizationId, productId, newProductImagePat
             const product = await productModel.findOneAndUpdate({ _id: productId }, { imagePath: newProductImagePath });
             if (product) {
                 return {
-                    msg: getSuitableTranslations("Change Product Image Process Has Been Successfully !!", language),
+                    msg: getSuitableTranslations("Changing Product Image Process Has Been Successfully !!", language),
                     error: false,
                     data: {
                         deletedProductImagePath: product.imagePath,

@@ -7,7 +7,7 @@ const { getSuitableTranslations } = require("../global/functions");
 async function getWalletProductsCount(filters, language) {
     try {
         return {
-            msg: getSuitableTranslations("Get All Products Count Inside The Wallet Process Has Been Successfully !!", language),
+            msg: getSuitableTranslations("Get Products Count Inside The Wallet For This User Process Has Been Successfully !!", language),
             error: false,
             data: await productsWalletModel.countDocuments(filters),
         }
@@ -20,7 +20,7 @@ async function getWalletProductsCount(filters, language) {
 async function getAllWalletProductsInsideThePage(pageNumber, pageSize, filters, language) {
     try {
         return {
-            msg: getSuitableTranslations(`Get All Wallet Products Inside The Page: ${pageNumber} Process Has Been Successfully !!`, language, { pageNumber }),
+            msg: getSuitableTranslations("Get All Products Inside The Wallet For This User The Page: {{pageNumber}} Process Has Been Successfully !!", language, { pageNumber }),
             error: false,
             data: await productsWalletModel.find(filters).skip((pageNumber - 1) * pageSize).limit(pageSize),
         }
@@ -37,13 +37,13 @@ async function deleteWalletProduct(userId, productId, language) {
             const walletProduct = await productsWalletModel.findOneAndDelete({ productId, userId });
             if (walletProduct) {
                 return {
-                    msg: getSuitableTranslations("Deleting Product From Wallet Process Has Been Successfully !!", language),
+                    msg: getSuitableTranslations("Deleting Product From Wallet For This User Process Has Been Successfully !!", language),
                     error: false,
                     data: {},
                 }
             }
             return {
-                msg: getSuitableTranslations("Sorry, This Product Inside The Wallet Is Not Exist !!", language),
+                msg: getSuitableTranslations("Sorry, This Product Inside The Wallet For This User Is Not Exist !!", language),
                 error: true,
                 data: {},
             }
