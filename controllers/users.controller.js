@@ -1,4 +1,4 @@
-const { getResponseObject, sendVerificationCodeToUserEmail, sendCongratulationsOnCreatingNewAccountEmail, sendChangePasswordEmail } = require("../global/functions");
+const { getResponseObject, sendVerificationCodeToUserEmail, sendCongratulationsOnCreatingNewAccountEmail, sendChangePasswordEmail, getSuitableTranslations } = require("../global/functions");
 
 const usersOPerationsManagmentFunctions = require("../models/users.model");
 
@@ -24,8 +24,8 @@ function getFiltersObject(filters) {
 
 async function login(req, res) {
     try{
-        const { email, password } = req.query;
-        const result = await usersOPerationsManagmentFunctions.login(email.toLowerCase(), password);
+        const { email, password, language } = req.query;
+        const result = await usersOPerationsManagmentFunctions.login(email.toLowerCase(), password, language);
         if (!result.error) {
             res.json({
                 msg: result.msg,
@@ -42,13 +42,14 @@ async function login(req, res) {
         res.json(result);
     }
     catch(err){
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
-async function loginWithGoogle(req, res) {
+async function loginByGoogle(req, res) {
     try{
-        const result = await usersOPerationsManagmentFunctions.loginWithGoogle(req.query);
+        const { email, firstName, lastName, previewName, language } = req.query;
+        const result = await usersOPerationsManagmentFunctions.loginByGoogle({ email, firstName, lastName, previewName }, language);
         res.json({
             msg: result.msg,
             error: result.error,
@@ -61,86 +62,79 @@ async function loginWithGoogle(req, res) {
         });
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function getUserInfo(req, res) {
     try{
-        res.json(await usersOPerationsManagmentFunctions.getUserInfo(req.data._id));
+        res.json(await usersOPerationsManagmentFunctions.getUserInfo(req.data._id, req.query.language));
     }
     catch(err){
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function getUsersCount(req, res) {
     try{
-        const result = await usersOPerationsManagmentFunctions.getUsersCount(req.data._id, getFiltersObject(req.query));
+        const result = await usersOPerationsManagmentFunctions.getUsersCount(req.data._id, getFiltersObject(req.query), req.query.language);
         if (result.error) {
             if (result.msg === "Sorry, Permission Denied !!" || result.msg === "Sorry, This Admin Is Not Exist !!") {
-                res.status(401).json(getResponseObject("Unauthorized Error", true, {}));
-                return;
+                return res.status(401).json(result);
             }
-            res.json(result);
-            return;
+            return res.json(result);
         }
         res.json(result);
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function getAllUsersInsideThePage(req, res) {
     try{
         const filters = req.query;
-        const result = await usersOPerationsManagmentFunctions.getAllUsersInsideThePage(req.data._id, filters.pageNumber, filters.pageSize, getFiltersObject(filters));
+        const result = await usersOPerationsManagmentFunctions.getAllUsersInsideThePage(req.data._id, filters.pageNumber, filters.pageSize, getFiltersObject(filters), filters.language);
         if (result.error) {
             if (result.msg === "Sorry, Permission Denied !!" || result.msg === "Sorry, This Admin Is Not Exist !!") {
-                res.status(401).json(getResponseObject("Unauthorized Error", true, {}));
-                return;
+                return res.status(401).json(result);
             }
-            res.json(result);
-            return;
+            return res.json(result);
         }
         res.json(result);
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function getForgetPassword(req, res) {
     try{
-        const { email, userType } = req.query;
-        let result = await usersOPerationsManagmentFunctions.isExistUserAccount(email, userType);
+        const { email, userType, language } = req.query;
+        let result = await usersOPerationsManagmentFunctions.isExistUserAccount(email, userType, language);
         if (!result.error) {
             if (userType === "user") {
                 if (!result.data.isVerified) {
-                    res.json({
+                    return res.json({
                         msg: "Sorry, The Email For This User Is Not Verified !!",
                         error: true,
                         data: result.data,
                     });
-                    return;
                 }
             }
-            result = await isBlockingFromReceiveTheCodeAndReceiveBlockingExpirationDate(email, "to reset password");
+            result = await isBlockingFromReceiveTheCodeAndReceiveBlockingExpirationDate(email, "to reset password", language);
             if (result.error) {
-                res.json(result);
-                return;
+                return res.json(result);
             }
             result = await sendVerificationCodeToUserEmail(email);
             if (!result.error) {
-                res.json(await addNewAccountVerificationCode(email, result.data, "to reset password"));
-                return;
+                return res.json(await addNewAccountVerificationCode(email, result.data, "to reset password", language));
             }
         }
         res.json(result);
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
@@ -155,7 +149,7 @@ async function createNewUser(req, res) {
         res.json(result);
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
@@ -178,23 +172,23 @@ async function postAccountVerificationCode(req, res) {
         res.json(result);
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function putUserInfo(req, res) {
     try{
-        res.json(await usersOPerationsManagmentFunctions.updateUserInfo(req.data._id, req.body));
+        res.json(await usersOPerationsManagmentFunctions.updateUserInfo(req.data._id, req.body, req.query.language));
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function putVerificationStatus(req, res) {
     try{
-        const { email, code } = req.query;
-        let result = await isAccountVerificationCodeValid(email, code, "to activate account");
+        const { email, code, language } = req.query;
+        let result = await isAccountVerificationCodeValid(email, code, "to activate account", language);
         if (!result.error) {
             result = await usersOPerationsManagmentFunctions.updateVerificationStatus(email);
             if (!result.error) {
@@ -213,16 +207,16 @@ async function putVerificationStatus(req, res) {
         res.json(result);
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function putResetPassword(req, res) {
     try{
-        const { email, userType, code, newPassword } = req.query;
-        const result = await isAccountVerificationCodeValid(email, code, "to reset password");
+        const { email, userType, code, newPassword, language } = req.query;
+        const result = await isAccountVerificationCodeValid(email, code, "to reset password", language);
         if (!result.error) {
-            result = await usersOPerationsManagmentFunctions.resetUserPassword(email, userType, newPassword);
+            result = await usersOPerationsManagmentFunctions.resetUserPassword(email, userType, newPassword, language);
             if (!result.error) {
                 await sendChangePasswordEmail(email, result.data.language)
             }
@@ -231,25 +225,23 @@ async function putResetPassword(req, res) {
         res.json(result);
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function deleteUser(req, res) {
     try{
-        const result = await usersOPerationsManagmentFunctions.deleteUser(req.data._id, req.params.userId);
+        const result = await usersOPerationsManagmentFunctions.deleteUser(req.data._id, req.params.userId, req.query.language);
         if (result.error) {
             if (result.msg === "Sorry, Permission Denied !!" || result.msg === "Sorry, This Admin Is Not Exist !!") {
-                res.status(401).json(getResponseObject("Unauthorized Error", true, {}));
-                return;
+                return res.status(401).json(result);
             }
-            res.json(result);
-            return;
+            return res.json(result);
         }
         res.json(result);
     }
     catch(err){
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
@@ -257,7 +249,7 @@ module.exports = {
     createNewUser,
     postAccountVerificationCode,
     login,
-    loginWithGoogle,
+    loginByGoogle,
     getUserInfo,
     getUsersCount,
     getAllUsersInsideThePage,

@@ -1,4 +1,4 @@
-const { getResponseObject, sendReceiveOrderEmail, sendUpdateOrderEmail } = require("../global/functions");
+const { getResponseObject, sendReceiveOrderEmail, sendUpdateOrderEmail, getSuitableTranslations } = require("../global/functions");
 
 const ordersManagmentFunctions = require("../models/orders.model");
 
@@ -43,35 +43,35 @@ function getFiltersObjectForUpdateOrder(acceptableData) {
 
 async function getOrdersCount(req, res) {
     try{
-        res.json(await ordersManagmentFunctions.getOrdersCount(req.data._id, getFiltersObject(req.query)));
+        res.json(await ordersManagmentFunctions.getOrdersCount(req.data._id, getFiltersObject(req.query), req.query.language));
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function getAllOrdersInsideThePage(req, res) {
     try{
         const filters = req.query;
-        res.json(await ordersManagmentFunctions.getAllOrdersInsideThePage(req.data._id, filters.pageNumber, filters.pageSize, getFiltersObject(filters)));
+        res.json(await ordersManagmentFunctions.getAllOrdersInsideThePage(req.data._id, filters.pageNumber, filters.pageSize, getFiltersObject(filters), filters.language));
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function getOrderDetails(req, res) {
     try{
-        res.json(await ordersManagmentFunctions.getOrderDetails(req.params.orderId));
+        res.json(await ordersManagmentFunctions.getOrderDetails(req.params.orderId, req.query.language));
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function postNewOrder(req, res) {
     try{
-        const result = await ordersManagmentFunctions.createNewOrder(req.body);
+        const result = await ordersManagmentFunctions.createNewOrder(req.body, req.query.language);
         if (!result.error) {
             if (req.body.checkoutStatus === "Checkout Successfull") {
                 await sendReceiveOrderEmail(result.data.billingAddress.email, result.data, result.data.language);
@@ -87,7 +87,7 @@ async function postNewOrder(req, res) {
         res.json(result);
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
@@ -97,10 +97,10 @@ async function postNewPaymentOrder(req, res) {
         if (req?.data._id){
             orderData.userId = req.data._id;
         }
-        const result = await ordersManagmentFunctions.createNewOrder(orderData);
+        const result = await ordersManagmentFunctions.createNewOrder(orderData, req.query.language);
         if (result.error) {
             if (result.msg === "Sorry, This User Is Not Exist !!") {
-                return res.status(401).json(getResponseObject("Unauthorized Error", true, {}));
+                return res.status(401).json(result);
             }
             return res.json(result);
         }
@@ -136,35 +136,35 @@ async function postNewPaymentOrder(req, res) {
                         Authorization: `Bearer ${process.env.TAP_PAYMENT_GATEWAY_SECRET_KEY}`
                     }
                 });
-                return res.json(getResponseObject("Creating New Payment Order By Tap Process Has Been Successfully !!", false, response.data));
+                return res.json(getResponseObject(getSuitableTranslations("Creating New Payment Order By Tap Process Has Been Successfully !!", language), false, response.data));
             }
         }
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function postCheckoutComplete(req, res) {
     try{
-        const result = await ordersManagmentFunctions.changeCheckoutStatusToSuccessfull(req.params.orderId);
+        const result = await ordersManagmentFunctions.changeCheckoutStatusToSuccessfull(req.params.orderId, req.query.language);
         res.json(result);
         if (!result.error) {
             await sendReceiveOrderEmail(result.data.billingAddress.email, result.data, "ar");
         }
     }
     catch(err) {
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function putOrder(req, res) {
     try{
         const { status, orderAmount } = req.body;
-        const result = await ordersManagmentFunctions.updateOrder(req.data._id, req.params.orderId, getFiltersObjectForUpdateOrder({ status, orderAmount }));
+        const result = await ordersManagmentFunctions.updateOrder(req.data._id, req.params.orderId, getFiltersObjectForUpdateOrder({ status, orderAmount }), req.query.language);
         if (result.error) {
             if (result.msg === "Sorry, This Admin Is Not Exist !!") {
-                return res.status(401).json(getResponseObject("Unauthorized Error", true, {}));
+                return res.status(401).json(result);
             }
         }
         if (req.query.isSendEmailToTheCustomer) {
@@ -176,56 +176,53 @@ async function putOrder(req, res) {
         res.json(result);
     }
     catch(err){
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function putOrderProduct(req, res) {
     try{
-        const result = await ordersManagmentFunctions.updateOrderProduct(req.data._id, req.params.orderId, req.params.productId, req.body);
+        const result = await ordersManagmentFunctions.updateOrderProduct(req.data._id, req.params.orderId, req.params.productId, req.body, req.query.language);
         if (result.error) {
             if (result.msg === "Sorry, This Admin Is Not Exist !!") {
-                res.status(401).json(getResponseObject("Unauthorized Error", true, {}));
-                return;
+                return res.status(401).json(result);
             }
         }
         res.json(result);
     }
     catch(err){
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function deleteOrder(req, res) {
     try{
-        const result = await ordersManagmentFunctions.deleteOrder(req.data._id, req.params.orderId);
+        const result = await ordersManagmentFunctions.deleteOrder(req.data._id, req.params.orderId, req.query.language);
         if (result.error) {
             if (result.msg === "Sorry, This Admin Is Not Exist !!") {
-                res.status(401).json(getResponseObject("Unauthorized Error", true, {}));
-                return;
+                return res.status(401).json(result);
             }
         }
         res.json(result);
     }
     catch(err){
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 
 async function deleteProductFromOrder(req, res) {
     try{
         const { orderId, productId } = req.params;
-        const result = await ordersManagmentFunctions.deleteProductFromOrder(req.data._id, orderId, productId);
+        const result = await ordersManagmentFunctions.deleteProductFromOrder(req.data._id, orderId, productId, req.query.language);
         if (result.error) {
             if (result.msg === "Sorry, This Admin Is Not Exist !!") {
-                res.status(401).json(getResponseObject("Unauthorized Error", true, {}));
-                return;
+                return res.status(401).json(result);
             }
         }
         res.json(result);
     }
     catch(err){
-        res.status(500).json(getResponseObject("Internal Server Error !!", true, {}));
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
     }
 }
 

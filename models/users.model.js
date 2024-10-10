@@ -70,7 +70,7 @@ async function login(email, password, language) {
     }
 }
 
-async function loginWithGoogle(userInfo, language) {
+async function loginByGoogle(userInfo, language) {
     try{
         const user = await userModel.findOne({ email: userInfo.email });
         if (user) {
@@ -397,7 +397,7 @@ async function deleteUser(authorizationId, userId, language){
 module.exports = {
     createNewUser,
     login,
-    loginWithGoogle,
+    loginByGoogle,
     getUserInfo,
     isExistUserAccount,
     isExistUserAndVerificationEmail,
