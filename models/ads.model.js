@@ -18,7 +18,7 @@ async function addNewAd(authorizationId, adsInfo, language) {
             }
             await (new adModel(adsInfo)).save();
             return {
-                msg: getSuitableTranslations("Adding New Text Ad Process Has Been Successfully", language),
+                msg: getSuitableTranslations("Adding New Text Ad Process Has Been Successfully !!", language),
                 error: false,
                 data: {},
             }

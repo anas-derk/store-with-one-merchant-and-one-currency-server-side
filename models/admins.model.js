@@ -97,7 +97,7 @@ async function getAllAdminsInsideThePage(superAdminId, pageNumber, pageSize, fil
                 }
             }
             return {
-                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
+                msg: getSuitableTranslations("Sorry, Permission Denied Because This Admin Is Not Super Admin !!", language),
                 error: true,
                 data: {},
             }
@@ -209,7 +209,7 @@ async function addNewAdmin(superAdminId, adminInfo, language) {
                 }
             }
             return {
-                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
+                msg: getSuitableTranslations("Sorry, Permission Denied Because This Admin Is Not Super Admin !!", language),
                 error: true,
                 data: {},
             }
@@ -245,7 +245,7 @@ async function updateAdminInfo(superAdminId, adminId, newAdminDetails, language)
                 }
             }
             return {
-                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
+                msg: getSuitableTranslations("Sorry, Permission Denied Because This Admin Is Not Super Admin !!", language),
                 error: true,
                 data: {},
             }
@@ -267,7 +267,7 @@ async function deleteAdmin(superAdminId, adminId, language){
             if (admin.isSuperAdmin){
                 if ((new mongoose.Types.ObjectId(adminId)).equals(superAdminId)) {
                     return {
-                        msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
+                        msg: getSuitableTranslations("Sorry, Permission Denied Because This Admin Is The Super Admin !!", language),
                         error: true,
                         data: {},
                     }
@@ -275,7 +275,7 @@ async function deleteAdmin(superAdminId, adminId, language){
                 const adminDetails = await adminModel.findOneAndDelete({ _id: adminId });
                 if (adminDetails) {
                     return {
-                        msg: getSuitableTranslations("Delete Admin Process Has Been Successfully !!"),
+                        msg: getSuitableTranslations("Deleting Admin Process Has Been Successfully !!"),
                         error: false,
                         data: {},
                     }
@@ -287,7 +287,7 @@ async function deleteAdmin(superAdminId, adminId, language){
                 }
             }
             return {
-                msg: getSuitableTranslations("Sorry, Permission Denied !!", language),
+                msg: getSuitableTranslations("Sorry, Permission Denied Because This Admin Is Not Super Admin !!", language),
                 error: true,
                 data: {},
             }
