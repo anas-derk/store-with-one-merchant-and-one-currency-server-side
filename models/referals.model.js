@@ -16,7 +16,7 @@ async function addNewReferal(referalDetails, language) {
         }
         await (new referalModel(referalDetails)).save();
         return {
-            msg: getSuitableTranslations("Ok !!, Create New Referal Process Has Been Successfuly !!", language),
+            msg: getSuitableTranslations("Creating New Referal Process Has Been Successfuly !!", language),
             error: false,
             data: {},
         }
@@ -29,7 +29,7 @@ async function addNewReferal(referalDetails, language) {
 async function getProductReferalsCount(filters, language) {
     try {
         return {
-            msg: getSuitableTranslations("Get Products Count Process Has Been Successfully !!", language),
+            msg: getSuitableTranslations("Get Product Referals Count Process Has Been Successfully !!", language),
             error: false,
             data: await referalModel.countDocuments(filters),
         }
@@ -42,7 +42,7 @@ async function getProductReferalsCount(filters, language) {
 async function getAllProductReferalsInsideThePage(pageNumber, pageSize, filters, language) {
     try {
         return {
-            msg: getSuitableTranslations(`Get Products Count Inside The Page: ${pageNumber} Process Has Been Successfully !!`, language),
+            msg: getSuitableTranslations("Get All Product Referals Inside The Page: {{pageNumber} Process Has Been Successfully !!", language, { pageNumber }),
             error: false,
             data: await referalModel.find(filters).skip((pageNumber - 1) * pageSize).limit(pageSize),
         }

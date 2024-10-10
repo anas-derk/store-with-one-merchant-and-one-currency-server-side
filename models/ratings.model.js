@@ -37,7 +37,7 @@ async function selectProductRating(userId, ratingInfo, language) {
                 }
             }
             return {
-                msg: getSuitableTranslations("Sorry, This Product Is Not Found !!", language),
+                msg: getSuitableTranslations("Sorry, This Product Is Not Exist !!", language),
                 error: true,
                 data: {},
             }
@@ -68,13 +68,13 @@ async function getProductRatingByUserId(userId, productId, language) {
                     }
                 }
                 return {
-                    msg: getSuitableTranslations("Sorry, This Product Can't Exist Any Rating By This User !!", language),
+                    msg: getSuitableTranslations("Sorry, This Product Is Not Exist Any Rating By This User !!", language),
                     error: true,
                     data: {},
                 }
             }
             return {
-                msg: getSuitableTranslations("Sorry, This Product Is Not Found !!", language),
+                msg: getSuitableTranslations("Sorry, This Product Is Not Exist !!", language),
                 error: true,
                 data: {},
             }
