@@ -31,7 +31,7 @@ usersRouter.get("/login-with-google",
             { fieldName: "Preview Name", fieldValue: previewName, dataType: "string", isRequiredValue: true },
         ], res, next);
     },
-    usersController.loginWithGoogle
+    usersController.loginByGoogle
 );
 
 usersRouter.get("/user-info",
