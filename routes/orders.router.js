@@ -9,40 +9,10 @@ const { validateIsExistValueForFieldsAndDataTypes } = require("../global/functio
 ordersRouter.get("/orders-count",
     validateJWT,
     (req, res, next) => {
-        const { pageNumber, pageSize, destination } = req.query;
+        const { destination } = req.query;
         validateIsExistValueForFieldsAndDataTypes([
-            { fieldName: "page Number", fieldValue: Number(pageNumber), dataType: "number", isRequiredValue: false },
-            { fieldName: "page Size", fieldValue: Number(pageSize), dataType: "number", isRequiredValue: false },
             { fieldName: "Order Destination", fieldValue: destination, dataType: "string", isRequiredValue: true },
         ], res, next);
-    },
-    (req, res, next) => {
-        const { pageNumber } = req.query;
-        if (pageNumber) {
-            return validateNumbersIsGreaterThanZero([req.query.pageNumber], res, next, [], "Sorry, Please Send Valid Page Number ( Number Must Be Greater Than Zero ) !!");
-        }
-        next();
-    },
-    (req, res, next) => {
-        const { pageSize } = req.query;
-        if (pageSize) {
-            return validateNumbersIsGreaterThanZero([req.query.pageSize], res, next, [], "Sorry, Please Send Valid Page Number ( Number Must Be Greater Than Zero ) !!");
-        }
-        next();
-    },
-    (req, res, next) => {
-        const { pageNumber } = req.query;
-        if (pageNumber) {
-            return validateNumbersIsNotFloat([req.query.pageNumber], res, next, [], "Sorry, Please Send Valid Page Number ( Number Must Be Not Float ) !!");
-        }
-        next();
-    },
-    (req, res, next) => {
-        const { pageSize } = req.query;
-        if (pageSize) {
-            return validateNumbersIsNotFloat([req.query.pageSize], res, next, [], "Sorry, Please Send Valid Page Size ( Number Must Be Not Float ) !!");
-        }
-        next();
     },
     (req, res, next) => validateOrderDestination(req.query.destination, res, next),
     ordersController.getOrdersCount

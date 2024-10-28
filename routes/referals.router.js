@@ -2,7 +2,7 @@ const referalsRouter = require("express").Router();
 
 const referalsController = require("../controllers/referals.controller");
 
-const { validateEmail, validateName } = require("../middlewares/global.middlewares");
+const { validateEmail, validateName, validateNumbersIsGreaterThanZero, validateNumbersIsNotFloat } = require("../middlewares/global.middlewares");
 
 const { validateIsExistValueForFieldsAndDataTypes } = require("../global/functions");
 
@@ -39,6 +39,8 @@ referalsRouter.get("/all-product-referals-inside-the-page/:productId",
             { fieldName: "page Size", fieldValue: Number(pageSize), dataType: "number", isRequiredValue: true },
         ], res, next);
     },
+    (req, res, next) => validateNumbersIsGreaterThanZero([req.query.pageNumber, req.query.pageSize], res, next, ["Sorry, Please Send Valid Page Number ( Number Must Be Greater Than Zero ) !!", "Sorry, Please Send Valid Page Size ( Number Must Be Greater Than Zero ) !!"]),
+    (req, res, next) => validateNumbersIsNotFloat([req.query.pageNumber, req.query.pageSize], res, next, ["Sorry, Please Send Valid Page Number ( Number Must Be Not Float ) !!", "Sorry, Please Send Valid Page Size ( Number Must Be Not Float ) !!"]),
     referalsController.getAllProductReferalsInsideThePage
 );
 
