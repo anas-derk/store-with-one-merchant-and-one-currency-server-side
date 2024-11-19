@@ -13,16 +13,12 @@ async function postNewProduct(req, res) {
             outputImageFilePaths.push(`assets/images/products/${Math.random()}_${Date.now()}__${file.originalname.replaceAll(" ", "_").replace(/\.[^/.]+$/, ".webp")}`)
         });
         await handleResizeImagesAndConvertFormatToWebp(files, outputImageFilePaths);
-        const productInfo = {
+        const { language } = req.query;
+        const result = await productsManagmentFunctions.addNewProduct(req.data._id, {
             ...{ name, price, description, categoryId, discount, quantity } = Object.assign({}, req.body),
             imagePath: outputImageFilePaths[0],
             galleryImagesPaths: outputImageFilePaths.slice(1),
-        };
-        const { language } = req.query;
-        if(Number(productInfo.discount) < 0 || Number(productInfo.discount) > Number(productInfo.price)) {
-            return res.status(400).json(getResponseObject(getSuitableTranslations("Sorry, Please Send Valid Discount Value !!", language), true, {}));
-        }
-        const result = await productsManagmentFunctions.addNewProduct(req.data._id, productInfo, language);
+        }, language);
         if (result.error) {
             if (result.msg === "Sorry, This Admin Is Not Exist !!") {
                 return res.status(401).json(result);
